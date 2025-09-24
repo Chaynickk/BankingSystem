@@ -12,4 +12,4 @@ class Account(Base):
     is_frozen: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     client_id: Mapped[Optional[int]] = mapped_column(ForeignKey("clients.client_id"))
-    client: Mapped["Client"] = relationship(back_populates="accounts")
+    client: Mapped["Client"] = relationship("Client", back_populates="accounts")

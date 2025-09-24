@@ -4,3 +4,9 @@ BankingSystem/.env
 /BankingSystem/models/__pycache__
 /BankingSystem/db/__pycache__
 /BankingSystem/__pycache__
+BankingSystem/.env
+/BankingSystem/schemes/__pycache__
+/BankingSystem/crud/__pycache__
+/BankingSystem/__pycache__
+/BankingSystem/routes/__pycache__
+/BankingSystem/__pycache__

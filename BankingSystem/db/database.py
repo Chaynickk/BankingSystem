@@ -9,7 +9,7 @@ class Base(DeclarativeBase): pass
 
 async_engine = create_async_engine(DATABASE_URL, echo=True )
 
-AsyncSessionLocal = async_sessionmaker(async_engine)
+AsyncSessionLocal = async_sessionmaker(async_engine, expire_on_commit=False)
 
 @asynccontextmanager
 async def get_session():

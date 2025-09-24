@@ -1,7 +1,7 @@
 from db.database import get_session
 import asyncio
 
-from models import Account, Admin
+from models import Account, Admin, Password
 from models.client import Client
 import models
 
@@ -24,11 +24,17 @@ async def add_user():
         password_hash="124354346gh"
     )
 
+    password = Password(
+        client_id=2,
+        password="fsdkjhjsfksdfjk"
+    )
+
 
     async with get_session() as session:
         session.add(client)
         session.add(account)
         session.add(admin)
+        session.add(password)
         await session.commit()
 
 asyncio.run(add_user())
