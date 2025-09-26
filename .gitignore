@@ -10,3 +10,5 @@ BankingSystem/.env
 /BankingSystem/__pycache__
 /BankingSystem/routes/__pycache__
 /BankingSystem/__pycache__
+/.idea
+/BankingSystem/__pycache__

@@ -1,5 +1,7 @@
 from fastapi import FastAPI
-from routes.client import client_router
+from fastapi.params import Depends
+
+from routes.client import client_router, verification_client_token
 
 app = FastAPI(
     title="Banking API",
@@ -9,5 +11,5 @@ app = FastAPI(
 app.include_router(client_router)
 
 @app.get("/ping")
-def ping():
-    return {"pong": True}
+def ping(token = Depends(verification_client_token)):
+    return {"pong": token}

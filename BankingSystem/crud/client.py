@@ -1,3 +1,5 @@
+from fastapi.security import OAuth2PasswordRequestForm
+
 from db.database import get_session
 from models import Password
 from models.client import Client
@@ -46,20 +48,20 @@ async def registration_client(client_data: ClientRegistration):
             await session.rollback()
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Bad request"
+                detail=f"Bad request"
             )
 
-async def check_logint(client_logint: ClientLogin):
+async def check_logint(client_logint: OAuth2PasswordRequestForm):
     async with get_session() as session:
-        client = await session.execute(select(Client).where(Client.email == client_logint.email))
+        client = await session.execute(select(Client).where(Client.email == client_logint.username))
         client = client.scalar_one_or_none()
-        if client:
+        if client is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid email or password",
                 headers={"WWW-Authenticate": "Bearer"}
             )
-        result = await session.execute(select(Password).where(Password.client_id == client.client_id))
+        result = await session.execute(select(Password.password).where(Password.client_id == client.client_id))
         hash_password = result.scalar_one_or_none()
 
         try:

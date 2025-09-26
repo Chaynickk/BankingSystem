@@ -2,7 +2,6 @@
 -- PostgreSQL database dump
 --
 
-\restrict tAn6E6dF7FRUfexK0Nd2kDqkd2nAgmuCYmIp5DC0HGql14JekPSMz9hzxe5B1ih
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.6
@@ -418,6 +417,3 @@ ALTER TABLE ONLY public.clients_passwords
 --
 -- PostgreSQL database dump complete
 --
-
-\unrestrict tAn6E6dF7FRUfexK0Nd2kDqkd2nAgmuCYmIp5DC0HGql14JekPSMz9hzxe5B1ih
-

@@ -13,6 +13,3 @@ class ClientRegistration(BaseModel):
     phone_number: PhoneNumber
     password: PasswordStr
 
-class ClientLogin(BaseModel):
-    email: EmailStr
-    password: PasswordStr
