@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.params import Depends
 
+from routes.account import account_router
 from routes.client import client_router, verification_client_token
 
 app = FastAPI(
@@ -9,6 +10,7 @@ app = FastAPI(
 )
 
 app.include_router(client_router)
+app.include_router(account_router)
 
 @app.get("/ping")
 def ping(token = Depends(verification_client_token)):

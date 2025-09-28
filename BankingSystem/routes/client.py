@@ -24,6 +24,12 @@ def create_jwt_token(client):
 def verification_client_token(token = Depends(client_jwt)):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        if payload["role"] != "client":
+            raise HTTPException(
+                headers={"WWW-Authenticate": "Bearer"},
+                status_code=401,
+                detail="token error"
+            )
         return payload
     except jwt.ExpiredSignatureError:
         raise HTTPException(

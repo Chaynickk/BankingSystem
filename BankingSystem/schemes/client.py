@@ -1,9 +1,9 @@
 from typing import Annotated
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, StringConstraints
 from pydantic_extra_types.phone_numbers import PhoneNumber
 
-PasswordStr = Annotated[str, Field(min_lenght=10)]
+PasswordStr = Annotated[str, StringConstraints(min_length=10)]
 
 class ClientRegistration(BaseModel):
     first_name: str

@@ -1,9 +1,10 @@
 from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy.exc import SQLAlchemyError
 
 from db.database import get_session
 from models import Password
 from models.client import Client
-from schemes.client import ClientRegistration, ClientLogin
+from schemes.client import ClientRegistration
 from argon2.exceptions import VerifyMismatchError
 from fastapi import HTTPException, status
 from config import password_hasher
@@ -44,12 +45,25 @@ async def registration_client(client_data: ClientRegistration):
             await session.commit()
             await session.refresh(client)
             return client
-        except:
+
+        except HTTPException as e:
+            await session.rollback()
+            raise e
+
+        except SQLAlchemyError:
             await session.rollback()
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Bad request"
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Database error"
             )
+
+        except Exception:
+            await session.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Internal server error"
+            )
+
 
 async def check_logint(client_logint: OAuth2PasswordRequestForm):
     async with get_session() as session:
