@@ -2,11 +2,12 @@
 -- PostgreSQL database dump
 --
 
+\restrict hOmbchca52DkBswdophAqYBtIdIeKth4smu0ngfpsAurieWYNcF3ZOOU4ZQ8mLc
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.6
 
--- Started on 2025-09-23 15:12:26
+-- Started on 2025-09-24 15:40:46
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -104,7 +105,7 @@ CREATE TABLE public.accounts (
     account_id integer NOT NULL,
     client_id integer,
     amount_decimal integer DEFAULT 0 NOT NULL,
-    is_forzen boolean DEFAULT false NOT NULL,
+    is_frozen boolean DEFAULT false NOT NULL,
     CONSTRAINT amount_decimal CHECK (((amount_decimal <= 1000000000) AND (amount_decimal >= 0)))
 );
 
@@ -147,7 +148,8 @@ CREATE TABLE public.admins (
     last_name character varying(75) NOT NULL,
     patronymic character varying(75),
     password_hash text NOT NULL,
-    created_at timestamp with time zone DEFAULT now() NOT NULL
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    email character varying(320) NOT NULL
 );
 
 
@@ -412,8 +414,11 @@ ALTER TABLE ONLY public.clients_passwords
     ADD CONSTRAINT clients_passwords_client_id_fkey FOREIGN KEY (client_id) REFERENCES public.clients(client_id);
 
 
--- Completed on 2025-09-23 15:12:26
+-- Completed on 2025-09-24 15:40:47
 
 --
 -- PostgreSQL database dump complete
 --
+
+\unrestrict hOmbchca52DkBswdophAqYBtIdIeKth4smu0ngfpsAurieWYNcF3ZOOU4ZQ8mLc
+

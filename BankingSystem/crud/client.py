@@ -57,11 +57,11 @@ async def registration_client(client_data: ClientRegistration):
                 detail="Database error"
             )
 
-        except Exception:
+        except Exception as e:
             await session.rollback()
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Internal server error"
+                detail=f"{e}"
             )
 
 

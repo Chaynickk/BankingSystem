@@ -13,3 +13,7 @@ BankingSystem/.env
 /.idea
 /BankingSystem/__pycache__
 /BankingSystem/__pycache__
+BankingSystem/.env
+/BankingSystem/__pycache__
+/BankingSystem/software/functions/__pycache__
+/BankingSystem/software/windows/__pycache__
