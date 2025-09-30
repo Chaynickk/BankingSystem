@@ -10,5 +10,5 @@ def login(email, password, label, func):
         label.config(text="Email или пароль неверный")
 
 
-def registration():
+def registration(first_name, last_name, phone_number, email, password, label, func, patronymic=None):
     pass

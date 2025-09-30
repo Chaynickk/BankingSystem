@@ -1,9 +1,9 @@
 from tkinter import *
-from software.functions.frames import start_window
+from software.functions.frames import login_frame
 
 root = Tk()
 root.geometry("1500x900")
 
-start_window(root)
+login_frame(root)
 
 root.mainloop()

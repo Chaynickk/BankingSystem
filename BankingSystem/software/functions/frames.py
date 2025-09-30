@@ -1,12 +1,12 @@
-import re
 from tkinter import *
 from tkinter import ttk
 from software.functions.enter import login
 
 
+def login_frame(window: Tk, old_frame=None):
+    if old_frame is not None:
+        old_frame.destroy()
 
-
-def start_window(window: Tk):
     root = ttk.Frame(window)
     root.pack(expand=True, fill=BOTH)
     for c in range(15): root.columnconfigure(index=c, weight=1)
@@ -61,11 +61,11 @@ def registrations_frame(window: Tk, old_frame=None):
     last_name_label = ttk.Label(root, text="Фамилия", font=("Arial", 23))
     last_name_label.grid(column=3, row=15)
 
-    patronymi_entry = ttk.Entry(root, font=("Arial", 23))
-    patronymi_entry.grid(column=4, row=20, sticky=NSEW, columnspan=7)
+    patronymic_entry = ttk.Entry(root, font=("Arial", 23))
+    patronymic_entry.grid(column=4, row=20, sticky=NSEW, columnspan=7)
 
-    patronymi_label = ttk.Label(root, text="Отчество\n(необязательно)", justify=CENTER, font=("Arial", 23))
-    patronymi_label.grid(column=3, row=20)
+    patronymic_label = ttk.Label(root, text="Отчество", justify=CENTER, font=("Arial", 23))
+    patronymic_label.grid(column=3, row=20)
 
     email_entry = ttk.Entry(root, font=("Arial", 23))
     email_entry.grid(column=4, row=25, sticky=NSEW, columnspan=7)
@@ -84,6 +84,21 @@ def registrations_frame(window: Tk, old_frame=None):
 
     password_label = ttk.Label(root, text="Пароль", font=("Arial", 23))
     password_label.grid(column=3, row=35)
+
+    login_button = ttk.Button(root, text="Войти", command=lambda: login_frame(window, root))
+    login_button.grid(column=0, row=0, sticky=NSEW, rowspan=6, columnspan=2)
+
+    error_label = ttk.Label(root, text="", foreground="red", font=("Arial", 20))
+    error_label.grid(column=7, row=12)
+
+    login_button = ttk.Button(root,
+                              text="Войти",
+                              command=lambda: login(email=email_entry.get(),
+                                                    password=password_entry.get(),
+                                                    label=error_label,
+                                                    func=lambda: client_frame(window, root)))
+    login_button.grid(column=7, row=80, sticky=NSEW, rowspan=6)
+
 
 
 def client_frame(window: Tk, old_frame=None):
