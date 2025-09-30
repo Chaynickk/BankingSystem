@@ -17,3 +17,5 @@ BankingSystem/.env
 /BankingSystem/__pycache__
 /BankingSystem/software/functions/__pycache__
 /BankingSystem/software/windows/__pycache__
+/BankingSystem/software/__pycache__
+/BankingSystem/software/api_requests/__pycache__

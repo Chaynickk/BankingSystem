@@ -1,6 +1,5 @@
 from tkinter import *
-from tkinter import ttk
-from software.windows.start_window import start_window
+from software.functions.frames import start_window
 
 root = Tk()
 root.geometry("1500x900")
