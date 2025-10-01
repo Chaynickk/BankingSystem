@@ -13,3 +13,4 @@ MAX_BALANCE = int(os.getenv("MAX_BALANCE"))
 password_hasher = PasswordHasher(time_cost=3,
                                  hash_len=32,
                                  salt_len=16)
+
