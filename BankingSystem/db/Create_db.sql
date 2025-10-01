@@ -1,13 +1,4 @@
---
--- PostgreSQL database dump
---
 
-\restrict hOmbchca52DkBswdophAqYBtIdIeKth4smu0ngfpsAurieWYNcF3ZOOU4ZQ8mLc
-
--- Dumped from database version 17.6
--- Dumped by pg_dump version 17.6
-
--- Started on 2025-09-24 15:40:46
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -21,29 +12,9 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
---
--- TOC entry 4 (class 2615 OID 2200)
--- Name: public; Type: SCHEMA; Schema: -; Owner: pg_database_owner
---
-
-CREATE SCHEMA public;
-
-
-ALTER SCHEMA public OWNER TO pg_database_owner;
-
---
--- TOC entry 4838 (class 0 OID 0)
--- Dependencies: 4
--- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: pg_database_owner
---
 
 COMMENT ON SCHEMA public IS 'standard public schema';
 
-
---
--- TOC entry 237 (class 1255 OID 24650)
--- Name: audit_row_change(); Type: FUNCTION; Schema: public; Owner: postgres
---
 
 CREATE FUNCTION public.audit_row_change() RETURNS trigger
     LANGUAGE plpgsql
@@ -53,7 +24,6 @@ DECLARE
   pk_col text;
   pk_val text;
 BEGIN
-  -- находим имя PK-колонки (опционально)
   SELECT a.attname INTO pk_col
   FROM pg_index i
   JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY(i.indkey)
@@ -96,10 +66,6 @@ SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
---
--- TOC entry 220 (class 1259 OID 24607)
--- Name: accounts; Type: TABLE; Schema: public; Owner: postgres
---
 
 CREATE TABLE public.accounts (
     account_id integer NOT NULL,
@@ -112,10 +78,6 @@ CREATE TABLE public.accounts (
 
 ALTER TABLE public.accounts OWNER TO postgres;
 
---
--- TOC entry 219 (class 1259 OID 24606)
--- Name: accounts_account_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
 
 CREATE SEQUENCE public.accounts_account_id_seq
     AS integer
@@ -128,19 +90,9 @@ CREATE SEQUENCE public.accounts_account_id_seq
 
 ALTER SEQUENCE public.accounts_account_id_seq OWNER TO postgres;
 
---
--- TOC entry 4839 (class 0 OID 0)
--- Dependencies: 219
--- Name: accounts_account_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
 
 ALTER SEQUENCE public.accounts_account_id_seq OWNED BY public.accounts.account_id;
 
-
---
--- TOC entry 224 (class 1259 OID 24654)
--- Name: admins; Type: TABLE; Schema: public; Owner: postgres
---
 
 CREATE TABLE public.admins (
     admin_id integer NOT NULL,
@@ -155,10 +107,6 @@ CREATE TABLE public.admins (
 
 ALTER TABLE public.admins OWNER TO postgres;
 
---
--- TOC entry 223 (class 1259 OID 24653)
--- Name: admins_admin_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
 
 CREATE SEQUENCE public.admins_admin_id_seq
     AS integer
@@ -171,19 +119,9 @@ CREATE SEQUENCE public.admins_admin_id_seq
 
 ALTER SEQUENCE public.admins_admin_id_seq OWNER TO postgres;
 
---
--- TOC entry 4840 (class 0 OID 0)
--- Dependencies: 223
--- Name: admins_admin_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
 ALTER SEQUENCE public.admins_admin_id_seq OWNED BY public.admins.admin_id;
 
 
---
--- TOC entry 222 (class 1259 OID 24638)
--- Name: audit_log; Type: TABLE; Schema: public; Owner: postgres
---
 
 CREATE TABLE public.audit_log (
     log_id bigint NOT NULL,
@@ -200,10 +138,6 @@ CREATE TABLE public.audit_log (
 
 ALTER TABLE public.audit_log OWNER TO postgres;
 
---
--- TOC entry 221 (class 1259 OID 24637)
--- Name: audit_log_log_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
 
 CREATE SEQUENCE public.audit_log_log_id_seq
     START WITH 1
@@ -215,19 +149,10 @@ CREATE SEQUENCE public.audit_log_log_id_seq
 
 ALTER SEQUENCE public.audit_log_log_id_seq OWNER TO postgres;
 
---
--- TOC entry 4841 (class 0 OID 0)
--- Dependencies: 221
--- Name: audit_log_log_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
 
 ALTER SEQUENCE public.audit_log_log_id_seq OWNED BY public.audit_log.log_id;
 
 
---
--- TOC entry 218 (class 1259 OID 24598)
--- Name: clients; Type: TABLE; Schema: public; Owner: postgres
---
 
 CREATE TABLE public.clients (
     client_id integer NOT NULL,
@@ -242,10 +167,7 @@ CREATE TABLE public.clients (
 
 ALTER TABLE public.clients OWNER TO postgres;
 
---
--- TOC entry 217 (class 1259 OID 24597)
--- Name: clients_client_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
+
 
 CREATE SEQUENCE public.clients_client_id_seq
     AS integer
@@ -258,19 +180,12 @@ CREATE SEQUENCE public.clients_client_id_seq
 
 ALTER SEQUENCE public.clients_client_id_seq OWNER TO postgres;
 
---
--- TOC entry 4842 (class 0 OID 0)
--- Dependencies: 217
--- Name: clients_client_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
+
 
 ALTER SEQUENCE public.clients_client_id_seq OWNED BY public.clients.client_id;
 
 
---
--- TOC entry 225 (class 1259 OID 24722)
--- Name: clients_passwords; Type: TABLE; Schema: public; Owner: postgres
---
+
 
 CREATE TABLE public.clients_passwords (
     client_id integer NOT NULL,
@@ -280,42 +195,25 @@ CREATE TABLE public.clients_passwords (
 
 ALTER TABLE public.clients_passwords OWNER TO postgres;
 
---
--- TOC entry 4663 (class 2604 OID 24665)
--- Name: accounts account_id; Type: DEFAULT; Schema: public; Owner: postgres
---
+
 
 ALTER TABLE ONLY public.accounts ALTER COLUMN account_id SET DEFAULT nextval('public.accounts_account_id_seq'::regclass);
 
 
---
--- TOC entry 4669 (class 2604 OID 24666)
--- Name: admins admin_id; Type: DEFAULT; Schema: public; Owner: postgres
---
+
 
 ALTER TABLE ONLY public.admins ALTER COLUMN admin_id SET DEFAULT nextval('public.admins_admin_id_seq'::regclass);
 
 
---
--- TOC entry 4666 (class 2604 OID 24667)
--- Name: audit_log log_id; Type: DEFAULT; Schema: public; Owner: postgres
---
 
 ALTER TABLE ONLY public.audit_log ALTER COLUMN log_id SET DEFAULT nextval('public.audit_log_log_id_seq'::regclass);
 
 
---
--- TOC entry 4661 (class 2604 OID 24668)
--- Name: clients client_id; Type: DEFAULT; Schema: public; Owner: postgres
---
 
 ALTER TABLE ONLY public.clients ALTER COLUMN client_id SET DEFAULT nextval('public.clients_client_id_seq'::regclass);
 
 
---
--- TOC entry 4675 (class 2606 OID 24615)
--- Name: accounts accounts_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
+
 
 ALTER TABLE ONLY public.accounts
     ADD CONSTRAINT accounts_pkey PRIMARY KEY (account_id);
@@ -405,20 +303,8 @@ ALTER TABLE ONLY public.accounts
     ADD CONSTRAINT accounts_client_id_fkey FOREIGN KEY (client_id) REFERENCES public.clients(client_id);
 
 
---
--- TOC entry 4683 (class 2606 OID 24727)
--- Name: clients_passwords clients_passwords_client_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
+
 
 ALTER TABLE ONLY public.clients_passwords
     ADD CONSTRAINT clients_passwords_client_id_fkey FOREIGN KEY (client_id) REFERENCES public.clients(client_id);
-
-
--- Completed on 2025-09-24 15:40:47
-
---
--- PostgreSQL database dump complete
---
-
-\unrestrict hOmbchca52DkBswdophAqYBtIdIeKth4smu0ngfpsAurieWYNcF3ZOOU4ZQ8mLc
 
