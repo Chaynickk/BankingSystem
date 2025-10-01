@@ -1,6 +1,8 @@
 from tkinter import *
 from tkinter import ttk
-from software.functions.enter import login
+
+from software.api_requests.accouts import request_get_accounts
+from software.functions.enter import login, registration
 
 
 def login_frame(window: Tk, old_frame=None):
@@ -70,13 +72,13 @@ def registrations_frame(window: Tk, old_frame=None):
     email_entry = ttk.Entry(root, font=("Arial", 23))
     email_entry.grid(column=4, row=25, sticky=NSEW, columnspan=7)
 
-    email_label = ttk.Label(root, text="Почта", font=("Arial", 23))
+    email_label = ttk.Label(root, text="Email", font=("Arial", 23))
     email_label.grid(column=3, row=25)
 
     phone_number_entry = ttk.Entry(root, font=("Arial", 23))
     phone_number_entry.grid(column=4, row=30, sticky=NSEW, columnspan=7)
 
-    phone_number_label = ttk.Label(root, text="Email", font=("Arial", 23))
+    phone_number_label = ttk.Label(root, text="Телефон", font=("Arial", 23))
     phone_number_label.grid(column=3, row=30)
 
     password_entry = ttk.Entry(root, font=("Arial", 23))
@@ -88,16 +90,20 @@ def registrations_frame(window: Tk, old_frame=None):
     login_button = ttk.Button(root, text="Войти", command=lambda: login_frame(window, root))
     login_button.grid(column=0, row=0, sticky=NSEW, rowspan=6, columnspan=2)
 
-    error_label = ttk.Label(root, text="", foreground="red", font=("Arial", 20))
-    error_label.grid(column=7, row=12)
+    error_label = ttk.Label(root, text="vvvvvvvvv", foreground="red", font=("Arial", 20))
+    error_label.grid(column=7, row=60)
 
-    login_button = ttk.Button(root,
-                              text="Войти",
-                              command=lambda: login(email=email_entry.get(),
-                                                    password=password_entry.get(),
-                                                    label=error_label,
-                                                    func=lambda: client_frame(window, root)))
-    login_button.grid(column=7, row=80, sticky=NSEW, rowspan=6)
+    registration_button = ttk.Button(root,
+                              text="Зарегистрироваться",
+                              command=lambda: registration(email=email_entry.get(),
+                                                           first_name=first_name_entry.get(),
+                                                           last_name=last_name_entry.get(),
+                                                           patronymic=patronymic_entry.get(),
+                                                           phone_number=phone_number_entry.get(),
+                                                           password=password_entry.get(),
+                                                           label=error_label,
+                                                           func=lambda: client_frame(window, root)))
+    registration_button.grid(column=7, row=80, sticky=NSEW, rowspan=6)
 
 
 
@@ -105,11 +111,16 @@ def client_frame(window: Tk, old_frame=None):
     if old_frame is not None:
         old_frame.destroy()
 
+    accounts = request_get_accounts()
+
     root = ttk.Frame(window)
     root.pack(expand=True, fill=BOTH)
-    for c in range(15): root.columnconfigure(index=c, weight=1)
-    for r in range(20): root.rowconfigure(index=r, weight=1)
+    for c in range(5): root.columnconfigure(index=c, weight=1)
+    for r in range(10): root.rowconfigure(index=r, weight=1)
 
-    error_label = ttk.Label(root, text="dfgsdfg", foreground="red", font=("Arial", 20))
+    accounts_frame = Frame(root, bg="red")
+    accounts_frame.grid(columnspan=3, column=1, rowspan=9, row=0)
+
+    error_label = ttk.Label(accounts_frame, text="dfgsdfg", foreground="red", font=("Arial", 20))
     error_label.grid(column=7, row=12)
 
