@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 
+from sqlalchemy.dialects.mssql.information_schema import columns
+
 from software.api_requests.accouts import request_get_accounts
 from software.functions.enter import login, registration
 
@@ -28,7 +30,7 @@ def login_frame(window: tk.Tk, old_frame=None):
     email_label.grid(column=3, row=8)
 
     error_label = ttk.Label(root, text="", foreground="red", font=("Arial", 20))
-    error_label.grid(column=7, row=12)
+    error_label.grid(column=5, row=12, columnspan=5)
 
 
     login_button = ttk.Button(root,
@@ -91,7 +93,7 @@ def registrations_frame(window: tk.Tk, old_frame=None):
     login_button.grid(column=0, row=0, sticky=tk.NSEW, rowspan=6, columnspan=2)
 
     error_label = ttk.Label(root, text="", foreground="red", font=("Arial", 20))
-    error_label.grid(column=7, row=60)
+    error_label.grid(column=5, row=60, columnspan=5)
 
     registration_button = ttk.Button(root,
                               text="Зарегистрироваться",
@@ -109,7 +111,7 @@ def client_frame(window: tk.Tk, old_frame=None):
     if old_frame is not None:
         old_frame.destroy()
 
-    accounts = request_get_accounts()
+    accounts = request_get_accounts().json()["Accounts"]
 
     root = tk.Frame(window)
     root.pack(expand=True, fill=tk.BOTH)
@@ -129,17 +131,38 @@ def client_frame(window: tk.Tk, old_frame=None):
         else:
             accounts_frame.rowconfigure(index=r, weight=4)
 
-    len = 4
-
+    len_accounts = len(accounts)
     r = 1
     c = 1
-    while len > 0:
+    i = -1
+    while len_accounts > 0:
 
+        account_frame = tk.Frame(accounts_frame, bg="#d5d5d5")
+        account_frame.grid(row=r, column=c, sticky=tk.NSEW)
 
-        new_frame = tk.Frame(accounts_frame, bg="#d5d5d5")
-        new_frame.grid(row=r, column=c, sticky=tk.NSEW)
+        account_frame.columnconfigure(index=0, weight=1)
+        account_frame.columnconfigure(index=1, weight=5)
+        account_frame.columnconfigure(index=2, weight=1)
+        account_frame.columnconfigure(index=3, weight=2)
 
-        len -= 1
+        account_frame.rowconfigure(index=0, weight=1)
+        account_frame.rowconfigure(index=1, weight=1)
+        account_frame.rowconfigure(index=2, weight=2)
+
+        account_frame.columnconfigure(index=4, weight=1)
+        account_frame.rowconfigure(index=3, weight=2)
+
+        label_account = tk.Label(account_frame, text=f"№ {accounts[i]["account_id"]}", bg="#d5d5d5", font=("Arial", 23), justify=tk.CENTER)
+        label_account.grid(column=0, row=0, columnspan=4)
+
+        label_balance = tk.Label(account_frame, text=f"Баланс:\n{accounts[i]["amount_decimal"]}", bg="#d5d5d5", font=("Arial", 23), justify=tk.LEFT)
+        label_balance.grid(column=0, row=1, sticky=tk.EW)
+
+        button_enter = ttk.Button(account_frame, text="Войти")
+        button_enter.grid(column=3, row=2, sticky=tk.NSEW)
+
+        len_accounts -= 1
+        i-=1
 
         if c + 2 >= 7:
             c = 1
