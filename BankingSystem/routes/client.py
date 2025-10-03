@@ -60,7 +60,7 @@ async def client_create(client_data: ClientRegistration):
 async def client_logint(client_login: OAuth2PasswordRequestForm = Depends()):
     client = await check_logint(client_login)
     token = create_jwt_token(client)
-    return {"access_token": token, "token_type": "bearer"}
+    return {"access_token": token, "token_type": "bearer", "client": client}
 
 
 
