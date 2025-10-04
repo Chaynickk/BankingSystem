@@ -12,3 +12,4 @@ def request_account_registration():
     response = requests.post(API_URL + "account/registration", headers=headers)
     return response
 
+

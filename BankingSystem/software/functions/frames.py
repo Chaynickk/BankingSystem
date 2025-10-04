@@ -1,8 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
 
-from sqlalchemy.dialects.mssql.information_schema import columns
-
 from software.api_requests.accouts import request_get_accounts
 from software.functions.enter import login, registration
 
@@ -38,10 +36,13 @@ def login_frame(window: tk.Tk, old_frame=None):
                               command=lambda: login(email=email_entry.get(),
                                                     password=password_entry.get(),
                                                     label=error_label,
-                                                    func=lambda: client_frame(window, root)))
+                                                    func=lambda: client_frame(window, root)),
+                              style="Login.TButton")
     login_button.grid(column=7, row=16, sticky=tk.NSEW)
 
-    registration_button = ttk.Button(root, text="Зарегестрироватся", command=lambda: registrations_frame(window, root))
+    registration_button = ttk.Button(root, text="Зарегестрироватся",
+                                     command=lambda: registrations_frame(window, root),
+                                     style="Reg.TButton")
     registration_button.grid(column=0, row=0, sticky=tk.NSEW)
 
 def registrations_frame(window: tk.Tk, old_frame=None):
@@ -89,15 +90,16 @@ def registrations_frame(window: tk.Tk, old_frame=None):
     password_label = ttk.Label(root, text="Пароль", font=("Arial", 23))
     password_label.grid(column=3, row=35)
 
-    login_button = ttk.Button(root, text="Войти", command=lambda: login_frame(window, root))
+    login_button = ttk.Button(root, text="Войти", command=lambda: login_frame(window, root), style="Login.TButton")
     login_button.grid(column=0, row=0, sticky=tk.NSEW, rowspan=6, columnspan=2)
 
     error_label = ttk.Label(root, text="", foreground="red", font=("Arial", 20))
     error_label.grid(column=5, row=60, columnspan=5)
 
     registration_button = ttk.Button(root,
-                              text="Зарегистрироваться",
-                              command=lambda: registration(email=email_entry.get(),
+                                     text="Зарегистрироваться",
+                                     style="Reg.TButton",
+                                     command=lambda: registration(email=email_entry.get(),
                                                            first_name=first_name_entry.get(),
                                                            last_name=last_name_entry.get(),
                                                            patronymic=patronymic_entry.get(),
@@ -158,7 +160,7 @@ def client_frame(window: tk.Tk, old_frame=None):
         label_balance = tk.Label(account_frame, text=f"Баланс:\n{accounts[i]["amount_decimal"]}", bg="#d5d5d5", font=("Arial", 23), justify=tk.LEFT)
         label_balance.grid(column=0, row=1, sticky=tk.EW)
 
-        button_enter = ttk.Button(account_frame, text="Войти")
+        button_enter = ttk.Button(account_frame, text="Войти", style="Enter.TButton")
         button_enter.grid(column=3, row=2, sticky=tk.NSEW)
 
         len_accounts -= 1
@@ -184,10 +186,10 @@ def client_frame(window: tk.Tk, old_frame=None):
     menu_frame.columnconfigure(index=1, weight=5)
     menu_frame.columnconfigure(index=2, weight=1)
 
-    exit_button = ttk.Button(menu_frame, command=lambda: login_frame(window, root))
+    exit_button = ttk.Button(menu_frame, text="Выход", command=lambda: login_frame(window, root), style="Exit.TButton")
     exit_button.grid(row=9, column=1, sticky=tk.NSEW)
 
-    create_account_button = ttk.Button(menu_frame, command=lambda: login_frame(window, root))
+    create_account_button = ttk.Button(menu_frame, text="Создать новый счет", command=lambda: login_frame(window, root), style="CreateAccount.TButton")
     create_account_button.grid(row=1, column=1, sticky=tk.NSEW)
 
 
