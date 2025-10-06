@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from software.api_requests.accouts import request_get_accounts
+from software.functions.accaunts import add_account
 from software.functions.enter import login, registration
 
 
@@ -113,25 +114,47 @@ def client_frame(window: tk.Tk, old_frame=None):
     if old_frame is not None:
         old_frame.destroy()
 
-    accounts = request_get_accounts().json()["Accounts"]
-
     root = tk.Frame(window)
     root.pack(expand=True, fill=tk.BOTH)
-    for c in range(10): root.columnconfigure(index=c, weight=1)
+
+
+    for c in range(12): root.columnconfigure(index=c, weight=1)
     for r in range(10): root.rowconfigure(index=r, weight=1)
 
-    accounts_frame = tk.Frame(root)
+
+
+    account_canvas = tk.Canvas(root, highlightthickness=0)
+    account_canvas.grid(column=2, row=0, columnspan=9, rowspan=10, sticky=tk.NSEW)
+
+    scrollbar = ttk.Scrollbar(account_canvas, orient="vertical", command=account_canvas.yview)
+    scrollbar.grid(column=11, row=0, rowspan=10, sticky=tk.NS)
+
+    accounts_frame = tk.Canvas(account_canvas)
     accounts_frame.grid(column=2, row=0, columnspan=9, rowspan=10, sticky=tk.NSEW)
+
     for c in range(7):
         if c % 2 == 0:
             accounts_frame.columnconfigure(index=c, weight=1)
         else:
             accounts_frame.columnconfigure(index=c, weight=6)
     for r in range(9):
-        if r % 2 == 0:
+        if r == 0:
+            accounts_frame.rowconfigure(index=r, weight=2)
+        elif r % 2 == 0:
             accounts_frame.rowconfigure(index=r, weight=1)
         else:
             accounts_frame.rowconfigure(index=r, weight=4)
+
+    accounts_frame.columnconfigure(index=7, weight=1)
+
+    error_label = ttk.Label(accounts_frame, text="", foreground="red", font=("Arial", 20))
+    error_label.grid(column=0, row=0, columnspan=7)
+
+    try:
+        accounts = request_get_accounts().json()["Accounts"]
+    except KeyError:
+        error_label.config(text="Произошла ошибка, попробуйте перезати")
+        accounts = []
 
     len_accounts = len(accounts)
     r = 1
@@ -157,7 +180,7 @@ def client_frame(window: tk.Tk, old_frame=None):
         label_account = tk.Label(account_frame, text=f"№ {accounts[i]["account_id"]}", bg="#d5d5d5", font=("Arial", 23), justify=tk.CENTER)
         label_account.grid(column=0, row=0, columnspan=4)
 
-        label_balance = tk.Label(account_frame, text=f"Баланс:\n{accounts[i]["amount_decimal"]}", bg="#d5d5d5", font=("Arial", 23), justify=tk.LEFT)
+        label_balance = tk.Label(account_frame, text=f"Баланс:\n{int(accounts[i]["amount_decimal"]) / 100}", bg="#d5d5d5", font=("Arial", 23), justify=tk.LEFT)
         label_balance.grid(column=0, row=1, sticky=tk.EW)
 
         button_enter = ttk.Button(account_frame, text="Войти", style="Enter.TButton")
@@ -173,9 +196,6 @@ def client_frame(window: tk.Tk, old_frame=None):
             c+=2
 
 
-
-
-
     menu_frame = tk.Frame(root, bg="gray")
     menu_frame.grid(column=0, row=0, columnspan=2, rowspan=10, sticky=tk.NSEW)
 
@@ -189,9 +209,13 @@ def client_frame(window: tk.Tk, old_frame=None):
     exit_button = ttk.Button(menu_frame, text="Выход", command=lambda: login_frame(window, root), style="Exit.TButton")
     exit_button.grid(row=9, column=1, sticky=tk.NSEW)
 
-    create_account_button = ttk.Button(menu_frame, text="Создать новый счет", command=lambda: login_frame(window, root), style="CreateAccount.TButton")
+    create_account_button = ttk.Button(menu_frame,
+                                       text="Создать новый счет",
+                                       command=lambda: add_account(lambda: client_frame(window, root), error_label),
+                                       style="CreateAccount.TButton")
     create_account_button.grid(row=1, column=1, sticky=tk.NSEW)
 
-
+def frame_account(window):
+    pass
 
 

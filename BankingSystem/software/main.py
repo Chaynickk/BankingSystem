@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from software.functions.frames import login_frame
+from software.functions.frames import login_frame, client_frame
 
 root = tk.Tk()
 root.geometry("1500x900")
@@ -20,6 +20,8 @@ exit_button_style.configure("Exit.TButton", font=("Arial", 23))
 enter_button_style = ttk.Style()
 enter_button_style.configure("Enter.TButton", font=("Arial, 14"))
 
-login_frame(root)
+
+client_frame(root)
+#login_frame(root)
 
 root.mainloop()
