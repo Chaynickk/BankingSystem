@@ -124,31 +124,35 @@ def client_frame(window: tk.Tk, old_frame=None):
 
 
     account_canvas = tk.Canvas(root, highlightthickness=0)
-    account_canvas.grid(column=2, row=0, columnspan=9, rowspan=10, sticky=tk.NSEW)
+    account_canvas.grid(column=2, row=0, columnspan=10, rowspan=10, sticky=tk.NSEW)
 
-    scrollbar = ttk.Scrollbar(account_canvas, orient="vertical", command=account_canvas.yview)
-    scrollbar.grid(column=11, row=0, rowspan=10, sticky=tk.NS)
+    scrollbar = ttk.Scrollbar(root, orient="vertical", command=account_canvas.yview)
+    scrollbar.grid(column=12, row=0, rowspan=10, sticky=tk.NS)
 
-    accounts_frame = tk.Canvas(account_canvas)
-    accounts_frame.grid(column=2, row=0, columnspan=9, rowspan=10, sticky=tk.NSEW)
+    account_canvas.configure(yscrollcommand=scrollbar.set)
+
+    account_canvas.columnconfigure(index=0, weight=20)
+    account_canvas.columnconfigure(index=1, weight=1)
+    account_canvas.rowconfigure(index=0, weight=1)
+    account_canvas.rowconfigure(index=1, weight=1)
+
+    accounts_frame = tk.Frame(account_canvas)
+    win_id = account_canvas.create_window((0, 0), window=accounts_frame, anchor="nw")
+
+    accounts_frame.bind("<Configure>", lambda e: account_canvas.configure(scrollregion=account_canvas.bbox("all")))
+    account_canvas.bind("<Configure>", lambda e: account_canvas.itemconfigure(win_id, width=e.width))
 
     for c in range(7):
         if c % 2 == 0:
-            accounts_frame.columnconfigure(index=c, weight=1)
+            accounts_frame.columnconfigure(index=c, weight=1, minsize=4)
         else:
             accounts_frame.columnconfigure(index=c, weight=6)
-    for r in range(9):
-        if r == 0:
-            accounts_frame.rowconfigure(index=r, weight=2)
-        elif r % 2 == 0:
-            accounts_frame.rowconfigure(index=r, weight=1)
-        else:
-            accounts_frame.rowconfigure(index=r, weight=4)
+
 
     accounts_frame.columnconfigure(index=7, weight=1)
 
     error_label = ttk.Label(accounts_frame, text="", foreground="red", font=("Arial", 20))
-    error_label.grid(column=0, row=0, columnspan=7)
+    error_label.grid(column=0, row=0, columnspan=2)
 
     try:
         accounts = request_get_accounts().json()["Accounts"]
@@ -157,6 +161,15 @@ def client_frame(window: tk.Tk, old_frame=None):
         accounts = []
 
     len_accounts = len(accounts)
+
+    for r in range(len_accounts*2 + 1):
+        if r == 0:
+            accounts_frame.rowconfigure(index=r, weight=2)
+        elif r % 2 == 0:
+            accounts_frame.rowconfigure(index=r, weight=1, minsize=4)
+        else:
+            accounts_frame.rowconfigure(index=r, weight=4)
+
     r = 1
     c = 1
     i = -1
@@ -183,7 +196,7 @@ def client_frame(window: tk.Tk, old_frame=None):
         label_balance = tk.Label(account_frame, text=f"Баланс:\n{int(accounts[i]["amount_decimal"]) / 100}", bg="#d5d5d5", font=("Arial", 23), justify=tk.LEFT)
         label_balance.grid(column=0, row=1, sticky=tk.EW)
 
-        button_enter = ttk.Button(account_frame, text="Войти", style="Enter.TButton")
+        button_enter = ttk.Button(account_frame, text="Войти", style="Enter.TButton", command=lambda: frame_account(window, root))
         button_enter.grid(column=3, row=2, sticky=tk.NSEW)
 
         len_accounts -= 1
@@ -215,7 +228,52 @@ def client_frame(window: tk.Tk, old_frame=None):
                                        style="CreateAccount.TButton")
     create_account_button.grid(row=1, column=1, sticky=tk.NSEW)
 
-def frame_account(window):
-    pass
+def frame_account(window: tk.Tk, old_frame=None):
+    if old_frame is not None:
+        old_frame.destroy()
+
+    root = tk.Frame(window)
+    root.pack(expand=True, fill=tk.BOTH)
+
+    root.rowconfigure(index=0, weight=1)
+    root.columnconfigure(index=0, weight=1)
+
+    root.rowconfigure(index=1, weight=1)
+    root.rowconfigure(index=2, weight=4)
+    root.rowconfigure(index=3, weight=3)
+    root.rowconfigure(index=4, weight=3)
+    root.rowconfigure(index=5, weight=6)
+    root.rowconfigure(index=6, weight=4)
+    root.rowconfigure(index=7, weight=3)
+    root.rowconfigure(index=8, weight=3)
+    root.rowconfigure(index=9, weight=2)
+    root.rowconfigure(index=10, weight=3)
+    root.rowconfigure(index=11, weight=1)
+
+    root.columnconfigure(index=1, weight=1)
+    root.columnconfigure(index=2, weight=4)
+    root.columnconfigure(index=3, weight=7)
+    root.columnconfigure(index=4, weight=18)
+    root.columnconfigure(index=5, weight=12)
+
+    exit_button = ttk.Button(root, text="Выход", command=lambda: client_frame(window, root), style="Exit.TButton")
+    exit_button.grid(row=1, column=1, sticky=tk.NSEW)
+
+    heading_label = ttk.Label(root, text="Перевод", style="Heading.TLabel")
+    heading_label.grid(column=4, row=2)
+
+    number_account_label = ttk.Label(root, text="Номер аккаунта", style="LargeText.TLabel")
+    number_account_label.grid(column=3, row=3)
+
+    number_account_entry = ttk.Entry(root, font=("Arial", 25))
+    number_account_entry.grid(column=4, row=3, sticky=tk.EW)
+
+    money_label = ttk.Label(root, text="Сумма перевода", style="LargeText.TLabel")
+    money_label.grid(column=3, row=4)
+
+    money_entry = ttk.Entry(root, font=("Arial", 25))
+    money_entry.grid(column=4, row=4, sticky=tk.EW)
+
+
 
 
