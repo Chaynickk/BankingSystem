@@ -173,10 +173,14 @@ def client_frame(window: tk.Tk, old_frame=None):
     r = 1
     c = 1
     i = -1
+    list_frame = []
     while len_accounts > 0:
+
 
         account_frame = tk.Frame(accounts_frame, bg="#d5d5d5")
         account_frame.grid(row=r, column=c, sticky=tk.NSEW)
+
+        list_frame.append(account_frame)
 
         account_frame.columnconfigure(index=0, weight=1)
         account_frame.columnconfigure(index=1, weight=5)
@@ -196,8 +200,10 @@ def client_frame(window: tk.Tk, old_frame=None):
         label_balance = tk.Label(account_frame, text=f"Баланс:\n{int(accounts[i]["amount_decimal"]) / 100}", bg="#d5d5d5", font=("Arial", 23), justify=tk.LEFT)
         label_balance.grid(column=0, row=1, sticky=tk.EW)
 
-        button_enter = ttk.Button(account_frame, text="Войти", style="Enter.TButton", command=lambda: frame_account(window, root))
+
+        button_enter = ttk.Button(account_frame, text="Войти", style="Enter.TButton", command=lambda: frame_account(window, accounts, list_frame, old_frame=root))
         button_enter.grid(column=3, row=2, sticky=tk.NSEW)
+
 
         len_accounts -= 1
         i-=1
@@ -208,6 +214,9 @@ def client_frame(window: tk.Tk, old_frame=None):
         else:
             c+=2
 
+    print(len(accounts))
+    for i in range(len(accounts)+1):
+        print(-i)
 
     menu_frame = tk.Frame(root, bg="gray")
     menu_frame.grid(column=0, row=0, columnspan=2, rowspan=10, sticky=tk.NSEW)
@@ -228,9 +237,10 @@ def client_frame(window: tk.Tk, old_frame=None):
                                        style="CreateAccount.TButton")
     create_account_button.grid(row=1, column=1, sticky=tk.NSEW)
 
-def frame_account(window: tk.Tk, old_frame=None):
+def frame_account(window: tk.Tk, money, number, old_frame=None):
     if old_frame is not None:
         old_frame.destroy()
+
 
     root = tk.Frame(window)
     root.pack(expand=True, fill=tk.BOTH)
@@ -242,19 +252,21 @@ def frame_account(window: tk.Tk, old_frame=None):
     root.rowconfigure(index=2, weight=4)
     root.rowconfigure(index=3, weight=3)
     root.rowconfigure(index=4, weight=3)
-    root.rowconfigure(index=5, weight=6)
+    root.rowconfigure(index=5, weight=2)
     root.rowconfigure(index=6, weight=4)
-    root.rowconfigure(index=7, weight=3)
-    root.rowconfigure(index=8, weight=3)
+    root.rowconfigure(index=7, weight=1)
+    root.rowconfigure(index=8, weight=1)
     root.rowconfigure(index=9, weight=2)
     root.rowconfigure(index=10, weight=3)
     root.rowconfigure(index=11, weight=1)
 
     root.columnconfigure(index=1, weight=1)
     root.columnconfigure(index=2, weight=4)
-    root.columnconfigure(index=3, weight=7)
-    root.columnconfigure(index=4, weight=18)
-    root.columnconfigure(index=5, weight=12)
+    root.columnconfigure(index=3, weight=12)
+    root.columnconfigure(index=4, weight=1)
+    root.columnconfigure(index=5, weight=6)
+    root.columnconfigure(index=6, weight=6)
+    root.columnconfigure(index=7, weight=6)
 
     exit_button = ttk.Button(root, text="Выход", command=lambda: client_frame(window, root), style="Exit.TButton")
     exit_button.grid(row=1, column=1, sticky=tk.NSEW)
@@ -262,17 +274,26 @@ def frame_account(window: tk.Tk, old_frame=None):
     heading_label = ttk.Label(root, text="Перевод", style="Heading.TLabel")
     heading_label.grid(column=4, row=2)
 
+    transaction_button = ttk.Button(root, text="Перевести", style="Transaction.TButton")
+    transaction_button.grid(column=4, row=5, sticky=tk.NSEW)
+
     number_account_label = ttk.Label(root, text="Номер аккаунта", style="LargeText.TLabel")
-    number_account_label.grid(column=3, row=3)
+    number_account_label.grid(column=2, row=3)
 
     number_account_entry = ttk.Entry(root, font=("Arial", 25))
-    number_account_entry.grid(column=4, row=3, sticky=tk.EW)
+    number_account_entry.grid(column=3, row=3, columnspan=4, sticky=tk.EW)
 
     money_label = ttk.Label(root, text="Сумма перевода", style="LargeText.TLabel")
-    money_label.grid(column=3, row=4)
+    money_label.grid(column=2, row=4)
 
     money_entry = ttk.Entry(root, font=("Arial", 25))
-    money_entry.grid(column=4, row=4, sticky=tk.EW)
+    money_entry.grid(column=3, row=4, columnspan=4, sticky=tk.EW)
+
+    balance_label = ttk.Label(root, text=f"Баланс: {money}", style="LargeText.TLabel")
+    balance_label.grid(column=1, columnspan=2, row=9, sticky=tk.W)
+
+    number_account_client_label = ttk.Label(root, text=f"Ваш номер счета: {number}", style="LargeText.TLabel")
+    number_account_client_label.grid(column=1, columnspan=2, row=10, sticky=tk.W)
 
 
 

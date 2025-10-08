@@ -26,6 +26,9 @@ heading_label_style.configure("Heading.TLabel", font=("Arial", 30))
 large_text_label_style = ttk.Style()
 large_text_label_style.configure("LargeText.TLabel", font=("Arial", 25))
 
-#login_frame(root)
-frame_account(root)
+transaction_button_style = ttk.Style()
+transaction_button_style.configure("Transaction.TButton", font=("Arial", 20))
+
+login_frame(root)
+
 root.mainloop()
