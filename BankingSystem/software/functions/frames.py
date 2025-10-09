@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from software.api_requests.accouts import request_get_accounts
-from software.functions.accaunts import add_account
+from software.functions.accaunts import add_account, del_account
 from software.functions.enter import login, registration
 
 
@@ -197,11 +197,15 @@ def client_frame(window: tk.Tk, old_frame=None):
         label_account = tk.Label(account_frame, text=f"№ {accounts[i]["account_id"]}", bg="#d5d5d5", font=("Arial", 23), justify=tk.CENTER)
         label_account.grid(column=0, row=0, columnspan=4)
 
-        label_balance = tk.Label(account_frame, text=f"Баланс:\n{int(accounts[i]["amount_decimal"]) / 100}", bg="#d5d5d5", font=("Arial", 23), justify=tk.LEFT)
+        label_balance = tk.Label(account_frame, text=f"Баланс:\n{int(accounts[i]["amount_decimal"]):,.2f}".replace(",", " "), bg="#d5d5d5", font=("Arial", 18), justify=tk.LEFT)
         label_balance.grid(column=0, row=1, sticky=tk.EW)
 
 
-        button_enter = ttk.Button(account_frame, text="Войти", style="Enter.TButton", command=lambda: frame_account(window, accounts, list_frame, old_frame=root))
+        button_enter = ttk.Button(account_frame,
+                                  text="Войти",
+                                  style="Enter.TButton",
+                                  command=lambda money=accounts[i]["amount_decimal"], number=accounts[i]["account_id"]:
+                                  frame_account(window, money, number, old_frame=root))
         button_enter.grid(column=3, row=2, sticky=tk.NSEW)
 
 
@@ -214,9 +218,6 @@ def client_frame(window: tk.Tk, old_frame=None):
         else:
             c+=2
 
-    print(len(accounts))
-    for i in range(len(accounts)+1):
-        print(-i)
 
     menu_frame = tk.Frame(root, bg="gray")
     menu_frame.grid(column=0, row=0, columnspan=2, rowspan=10, sticky=tk.NSEW)
@@ -257,7 +258,7 @@ def frame_account(window: tk.Tk, money, number, old_frame=None):
     root.rowconfigure(index=7, weight=1)
     root.rowconfigure(index=8, weight=1)
     root.rowconfigure(index=9, weight=2)
-    root.rowconfigure(index=10, weight=3)
+    root.rowconfigure(index=10, weight=1)
     root.rowconfigure(index=11, weight=1)
 
     root.columnconfigure(index=1, weight=1)
@@ -289,12 +290,47 @@ def frame_account(window: tk.Tk, money, number, old_frame=None):
     money_entry = ttk.Entry(root, font=("Arial", 25))
     money_entry.grid(column=3, row=4, columnspan=4, sticky=tk.EW)
 
-    balance_label = ttk.Label(root, text=f"Баланс: {money}", style="LargeText.TLabel")
+    balance_label = ttk.Label(root, text=f"Баланс: {money:,.2f}". replace(",", " "), style="LargeText.TLabel")
     balance_label.grid(column=1, columnspan=2, row=9, sticky=tk.W)
 
     number_account_client_label = ttk.Label(root, text=f"Ваш номер счета: {number}", style="LargeText.TLabel")
     number_account_client_label.grid(column=1, columnspan=2, row=10, sticky=tk.W)
 
+    delete_button = ttk.Button(root, text="Удалить счет", style="Transaction.TButton",
+                               command=lambda: are_you_sure_frame(window, money, number, old_frame=root))
+    delete_button.grid(column=7, row=10, sticky=tk.NS)
+
+def are_you_sure_frame(window: tk.Tk, money, number, old_frame=None):
+    if old_frame is not None:
+        old_frame.destroy()
+
+    root = tk.Frame(window)
+    root.pack(expand=True, fill=tk.BOTH)
+
+    root.columnconfigure(index=0, weight=12)
+    root.columnconfigure(index=1, weight=4)
+    root.columnconfigure(index=2, weight=2)
+    root.columnconfigure(index=3, weight=4)
+    root.columnconfigure(index=4, weight=12)
+
+    root.rowconfigure(index=0, weight=5)
+    root.rowconfigure(index=1, weight=8)
+    root.rowconfigure(index=2, weight=2)
+    root.rowconfigure(index=3, weight=5)
 
 
+    warning_label = ttk.Label(root, text="Вы уверены что хотите удалить этот счет?\nБаланс этого счет будет утерян!",
+                              style="Heading.TLabel", justify=tk.CENTER)
+    warning_label.grid(column=1, columnspan=3, row=1)
 
+    error_label = ttk.Label(root, text="", foreground="red", style="LargeText.TLabel")
+    error_label.grid(column=1, columnspan=3, row=3)
+
+    accept_button = ttk.Button(root, text="Удалить", style="Choice.TButton",
+                               command=lambda: del_account(error_label=error_label,
+                                                           account_id=number,
+                                                           func=lambda: client_frame(window, root)))
+    accept_button.grid(column=1, row=2, sticky=tk.NSEW)
+
+    reject_button = ttk.Button(root, text="Отмена", style="Choice.TButton", command=lambda: frame_account(window, money=money, number=number, old_frame=root))
+    reject_button.grid(column=3, row=2, sticky=tk.NSEW)

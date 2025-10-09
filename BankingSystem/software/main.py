@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from software.functions.frames import login_frame, client_frame, frame_account
+from software.functions.frames import login_frame, client_frame, frame_account, are_you_sure_frame
 
 root = tk.Tk()
 root.geometry("1500x900")
@@ -29,6 +29,10 @@ large_text_label_style.configure("LargeText.TLabel", font=("Arial", 25))
 transaction_button_style = ttk.Style()
 transaction_button_style.configure("Transaction.TButton", font=("Arial", 20))
 
+choice_button_style = ttk.Style()
+choice_button_style.configure("Choice.TButton", font=("Arial", 20))
+
 login_frame(root)
+
 
 root.mainloop()
