@@ -102,7 +102,7 @@ async def completion_transaction(client_id: int, transaction: Transaction):
             if to_account.amount_decimal + transaction.money > MAX_BALANCE:
                 raise HTTPException(
                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                    detail=f"Destination account balance limit would be exceeded"
+                    detail=f"Destination account balance limit would be exceeded {to_account.amount_decimal, transaction.money}"
                 )
 
             if from_account.is_frozen or to_account.is_frozen:

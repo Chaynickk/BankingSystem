@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from software.api_requests.accouts import request_get_accounts
-from software.functions.accaunts import add_account, del_account
+from software.functions.accaunts import add_account, del_account, transaction
 from software.functions.enter import login, registration
 
 
@@ -197,8 +197,9 @@ def client_frame(window: tk.Tk, old_frame=None):
         label_account = tk.Label(account_frame, text=f"№ {accounts[i]["account_id"]}", bg="#d5d5d5", font=("Arial", 23), justify=tk.CENTER)
         label_account.grid(column=0, row=0, columnspan=4)
 
-        label_balance = tk.Label(account_frame, text=f"Баланс:\n{int(accounts[i]["amount_decimal"]):,.2f}".replace(",", " "), bg="#d5d5d5", font=("Arial", 18), justify=tk.LEFT)
+        label_balance = tk.Label(account_frame, text=f"Баланс:\n{int(accounts[i]["amount_decimal"]) / 100:,.2f}".replace(",", " "), bg="#d5d5d5", font=("Arial", 18), justify=tk.LEFT)
         label_balance.grid(column=0, row=1, sticky=tk.EW)
+
 
 
         button_enter = ttk.Button(account_frame,
@@ -238,7 +239,7 @@ def client_frame(window: tk.Tk, old_frame=None):
                                        style="CreateAccount.TButton")
     create_account_button.grid(row=1, column=1, sticky=tk.NSEW)
 
-def frame_account(window: tk.Tk, money, number, old_frame=None):
+def frame_account(window: tk.Tk, money, number, old_frame=None, transaction_done=None):
     if old_frame is not None:
         old_frame.destroy()
 
@@ -275,9 +276,6 @@ def frame_account(window: tk.Tk, money, number, old_frame=None):
     heading_label = ttk.Label(root, text="Перевод", style="Heading.TLabel")
     heading_label.grid(column=4, row=2)
 
-    transaction_button = ttk.Button(root, text="Перевести", style="Transaction.TButton")
-    transaction_button.grid(column=4, row=5, sticky=tk.NSEW)
-
     number_account_label = ttk.Label(root, text="Номер аккаунта", style="LargeText.TLabel")
     number_account_label.grid(column=2, row=3)
 
@@ -290,11 +288,33 @@ def frame_account(window: tk.Tk, money, number, old_frame=None):
     money_entry = ttk.Entry(root, font=("Arial", 25))
     money_entry.grid(column=3, row=4, columnspan=4, sticky=tk.EW)
 
-    balance_label = ttk.Label(root, text=f"Баланс: {money:,.2f}". replace(",", " "), style="LargeText.TLabel")
+    balance_label = ttk.Label(root, text=f"Баланс: {money / 100:,.2f}". replace(",", " "), style="LargeText.TLabel")
     balance_label.grid(column=1, columnspan=2, row=9, sticky=tk.W)
 
     number_account_client_label = ttk.Label(root, text=f"Ваш номер счета: {number}", style="LargeText.TLabel")
     number_account_client_label.grid(column=1, columnspan=2, row=10, sticky=tk.W)
+
+    if transaction_done is True:
+        status_label = ttk.Label(root, text="Перевод успешно выполнен", foreground="green", font=("Arial", 18))
+        status_label.grid(row=8, column=2, columnspan=6)
+    else:
+        status_label = ttk.Label(root, text="", foreground="red", font=("Arial", 18))
+        status_label.grid(row=8, column=2, columnspan=6)
+
+    transaction_button = ttk.Button(root,
+                                    text="Перевести",
+                                    style="Transaction.TButton",
+                                    command=lambda: transaction(error_label=status_label,
+                                                                balance=money, money=money_entry.get().replace(",", "."),
+                                                                from_account_id=number,
+                                                                to_account_id=number_account_entry.get(),
+                                                                func=lambda: frame_account(window,
+                                                                                           money=money-float(money_entry.get().replace(",", "."))*100,
+                                                                                           number=number,
+                                                                                           transaction_done=True,
+                                                                                           old_frame=root)))
+
+    transaction_button.grid(column=4, row=5, sticky=tk.NSEW)
 
     delete_button = ttk.Button(root, text="Удалить счет", style="Transaction.TButton",
                                command=lambda: are_you_sure_frame(window, money, number, old_frame=root))
