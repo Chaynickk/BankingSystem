@@ -54,7 +54,7 @@ def verification_client_token(token = Depends(client_jwt)):
 async def client_create(client_data: ClientRegistration):
     client = await registration_client(client_data)
     token = create_jwt_token(client)
-    return {"access_token": token, "token_type": "bearer"}
+    return {"access_token": token, "token_type": "bearer", "client": client}
 
 @client_router.post("/login")
 async def client_logint(client_login: OAuth2PasswordRequestForm = Depends()):
