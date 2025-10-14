@@ -11,3 +11,12 @@ class AdminRegistration(BaseModel):
     email: EmailStr
     phone_number: PhoneNumber
     password: PasswordStr
+
+class SelectClients(BaseModel):
+    client_id: int | None = None
+    first_name: str | None = None
+    last_name: str | None = None
+    patronymic: str | None = None
+    email: EmailStr | None = None
+    phone_number: PhoneNumber | None = None
+
