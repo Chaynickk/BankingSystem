@@ -7,7 +7,7 @@ from datetime import datetime, timezone, timedelta
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from crud.admin import registration_admin, check_login, get_admin_by_id, activate_admin_crud, frieze_account, \
-    get_not_activate_admins_crud, select_clients, get_accounts
+    get_not_activate_admins_crud, select_clients, get_accounts, reject_admin_crud
 from schemes.admin import AdminRegistration, SelectClients
 
 admin_router = APIRouter(prefix="/admin", tags=["Admin"])
@@ -83,25 +83,32 @@ async def activate_admin(admin_id: int, token = Depends(verification_admin_token
     return admin
 
 @admin_router.delete("/reject_admin")
-async def reject_admin(admin_id):
-    pass
+async def reject_admin(admin_id: int, token = Depends(verification_admin_token)):
+    await reject_admin_crud(admin_id)
+    return {"ok": True}
 
 @admin_router.get("/get_not_activate_admins")
-async def get_not_activate_admins():
+async def get_not_activate_admins(token = Depends(verification_admin_token)):
     admins = await get_not_activate_admins_crud()
     return admins
 
 @admin_router.get("/get_clients")
-def admin_get_clients(client_data: SelectClients):
-    clients = select_clients(first_name=client_data.first_name,
-                             last_name=client_data.last_name,
-                             patronymic=client_data.patronymic,
-                             email=client_data.email,
-                             phone_number=client_data.phone_number,
-                             client_id=client_data.client_id)
+async def admin_get_clients(first_name: str | None = None,
+                      last_name: str | None = None,
+                      patronymic: str | None = None,
+                      email: str | None = None,
+                      phone_number: str | None = None,
+                      client_id: int | None = None,
+                      token = Depends(verification_admin_token)):
+    clients = await select_clients(first_name=first_name,
+                             last_name=last_name,
+                             patronymic=patronymic,
+                             email=email,
+                             phone_number=phone_number,
+                             client_id=client_id)
     return clients
 
 @admin_router.get("/get_accounts")
-async def admin_get_accounts(client_id):
-    accounts = await get_accounts(client_id)
+async def admin_get_accounts(client_id: int, token = Depends(verification_admin_token)):
+    accounts = await get_accounts(int(client_id))
     return accounts

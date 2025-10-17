@@ -9,7 +9,6 @@ class AdminRegistration(BaseModel):
     last_name: str
     patronymic: str | None = None
     email: EmailStr
-    phone_number: PhoneNumber
     password: PasswordStr
 
 class SelectClients(BaseModel):

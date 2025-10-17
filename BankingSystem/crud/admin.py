@@ -19,12 +19,6 @@ async def registration_admin(admin_data: AdminRegistration):
                     detail="Email already registered"
                 )
 
-            some_phone = await session.execute(select(Admin).where(Admin.phone_number == admin_data.phone_number))
-            if some_phone.scalar_one_or_none():
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    detail="Phone number already registered"
-                )
 
             new_admin = Admin(
                 first_name = admin_data.first_name,
@@ -34,6 +28,7 @@ async def registration_admin(admin_data: AdminRegistration):
                 email = admin_data.email,
             )
 
+            session.add(new_admin)
             await session.commit()
             return new_admin
 
@@ -62,7 +57,7 @@ async def check_login(admin_login: OAuth2PasswordRequestForm):
         if admin is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid email or password",
+                detail=f"Invalid email or password {admin_login.username, admin_login.password, admin}",
                 headers={"WWW-Authenticate": "Bearer"}
             )
 
@@ -81,7 +76,7 @@ async def check_login(admin_login: OAuth2PasswordRequestForm):
 async def activate_admin_crud(admin_id: int):
     async with get_session() as session:
         try:
-            admin = await session.execute(Admin).where(Admin.admin_id == admin_id)
+            admin = await session.execute(select(Admin).where(Admin.admin_id == admin_id))
             admin = admin.scalar_one_or_none()
 
             if admin is None:
@@ -148,7 +143,7 @@ async def frieze_account(account_id):
 async def get_not_activate_admins_crud():
     async with get_session() as session:
         try:
-            admins = session.execute(select (Admin).where(Admin.is_active == False))
+            admins = await session.execute(select (Admin).where(Admin.is_active == False))
             return admins.scalars().all()
         except Exception:
             await session.rollback()
@@ -167,29 +162,34 @@ async def select_clients(client_id: int = None,
             filters = (client_id, first_name, last_name, patronymic, phone_number, email)
 
             if not any(filters):
-                raise HTTPException
+                raise HTTPException(
+                    status_code=422,
+                    detail="It is necessary to add at least 1 filter"
+                )
 
             query = select(Client)
 
             if client_id is not None:
-                query.where(Client.client_id == client_id)
+                query = query.where(Client.client_id == client_id)
 
             if first_name is not None:
-                query.where(Client.first_name == first_name)
+                query = query.where(Client.first_name == first_name)
 
             if last_name is not None:
-                query.where(Client.last_name == last_name)
+                query = query.where(Client.last_name == last_name)
 
             if patronymic is not None:
-                query.where(Client.phone_number == patronymic)
+                query = query.where(Client.patronymic == patronymic)
 
             if phone_number is not None:
-                query.where(Client.phone_number == phone_number)
+                query = query.where(Client.phone_number == phone_number)
 
             if email is not None:
-                query.where(Client.email == email)
+                query = query.where(Client.email == email)
 
-            return await session.scalars(query).all()
+            result = await session.scalars(query)
+            return result.all()
+
         except Exception:
             await session.rollback()
             raise HTTPException(
@@ -201,13 +201,14 @@ async def get_accounts(client_id):
         try:
             accounts = await session.execute(select(Account).where(Account.client_id==client_id))
             return accounts.scalars().all()
-        except Exception:
+        except Exception as e:
             await session.rollback()
             raise HTTPException(
-                status_code=500
+                status_code=500,
+                detail=f"{e}"
             )
 
-async def reject_admin_crud(admin_id):
+async def reject_admin_crud(admin_id: int):
     async with get_session() as session:
         try:
             result = await session.execute(select(Admin).where(Admin.admin_id == admin_id))
@@ -229,8 +230,9 @@ async def reject_admin_crud(admin_id):
         except HTTPException as e:
             session.rollback()
             raise e
-        except Exception:
+        except Exception as e:
             await session.rollback()
             raise HTTPException(
-                status_code=500
+                status_code=500,
+                detail=f"{e}"
             )
