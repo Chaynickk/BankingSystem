@@ -476,59 +476,44 @@ BEGIN
 END;
 $$;
 
--- универсальное "повесить триггеры на всё, кроме audit_log", но:
--- 1) только если у тебя есть привилегия TRIGGER на таблицу
--- 2) не падает на ошибке — просто скипает и пишет NOTICE
+-- чтобы не проглатывать фейлы на отладке
+\set ON_ERROR_STOP on
+
+-- (опционально) отдать владение одному юзеру
+-- ALTER TABLE    ALL IN SCHEMA public OWNER TO myuser;
+-- ALTER SEQUENCE ALL IN SCHEMA public OWNER TO myuser;
+-- ALTER FUNCTION public.audit_row_change() OWNER TO myuser;
+
+-- повесить триггеры на всё, кроме audit_log, если их ещё нет
 DO $$
 DECLARE
-    r RECORD;
-    trg_name TEXT;
+  r RECORD; trg_name text;
 BEGIN
   FOR r IN
-    SELECT n.nspname AS sch, c.relname AS tbl
+    SELECT n.nspname sch, c.relname tbl
     FROM pg_class c
     JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'r'              -- обычные таблицы
-      AND n.nspname = 'public'
-      AND c.relname <> 'audit_log'
+    WHERE c.relkind='r' AND n.nspname='public' AND c.relname <> 'audit_log'
   LOOP
-    trg_name := 'trg_audit_' || r.tbl;
+    trg_name := 'trg_audit_'||r.tbl;
 
-    -- есть ли уже такой триггер
-    IF EXISTS (
-      SELECT 1
-      FROM pg_trigger t
-      JOIN pg_class c2 ON c2.oid = t.tgrelid
-      JOIN pg_namespace n2 ON n2.oid = c2.relnamespace
+    IF NOT EXISTS (
+      SELECT 1 FROM pg_trigger t
+      JOIN pg_class c2 ON c2.oid=t.tgrelid
+      JOIN pg_namespace n2 ON n2.oid=c2.relnamespace
       WHERE NOT t.tgisinternal
-        AND t.tgname = trg_name
-        AND n2.nspname = r.sch
-        AND c2.relname = r.tbl
+        AND t.tgname=trg_name AND n2.nspname=r.sch AND c2.relname=r.tbl
     ) THEN
-      RAISE NOTICE 'Skip: триггер % уже есть на %.%', trg_name, r.sch, r.tbl;
-      CONTINUE;
+      -- проверка привилегии, чтобы не падать, если запускают «не тем» юзером
+      IF has_table_privilege(current_user, format('%I.%I', r.sch, r.tbl), 'TRIGGER') THEN
+        EXECUTE format(
+          'CREATE TRIGGER %I
+             AFTER INSERT OR UPDATE OR DELETE ON %I.%I
+           FOR EACH ROW EXECUTE FUNCTION public.audit_row_change();',
+          trg_name, r.sch, r.tbl
+        );
+      END IF;
     END IF;
-
-    -- есть ли у текущего юзера право вешать триггеры на эту таблицу
-    IF NOT has_table_privilege(current_user, format('%I.%I', r.sch, r.tbl), 'TRIGGER') THEN
-      RAISE NOTICE 'Skip: нет привилегии TRIGGER на %.%', r.sch, r.tbl;
-      CONTINUE;
-    END IF;
-
-    BEGIN
-      EXECUTE format(
-        'CREATE TRIGGER %I
-           AFTER INSERT OR UPDATE OR DELETE
-           ON %I.%I
-         FOR EACH ROW
-         EXECUTE FUNCTION public.audit_row_change();',
-        trg_name, r.sch, r.tbl
-      );
-      RAISE NOTICE 'OK: повесил % на %.%', trg_name, r.sch, r.tbl;
-    EXCEPTION WHEN OTHERS THEN
-      RAISE NOTICE 'Skip: не смог повесить % на %.%: %', trg_name, r.sch, r.tbl, SQLERRM;
-      -- и едем дальше
-    END;
   END LOOP;
 END;
 $$ LANGUAGE plpgsql;
