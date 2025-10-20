@@ -7,7 +7,7 @@ from datetime import datetime, timezone, timedelta
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from crud.admin import registration_admin, check_login, get_admin_by_id, activate_admin_crud, frieze_account, \
-    get_not_activate_admins_crud, select_clients, get_accounts, reject_admin_crud
+    get_not_activate_admins_crud, select_clients, get_accounts, reject_admin_crud, unfreeze_account
 from schemes.admin import AdminRegistration, SelectClients
 
 admin_router = APIRouter(prefix="/admin", tags=["Admin"])
@@ -71,11 +71,10 @@ async def admin_create(admin_data: AdminRegistration):
     token = create_jwt_token(admin)
     return {"access_token": token, "token_type": "bearer", "admin": admin}
 
-@admin_router.put("/frieze_account")
-async def admin_frieze_account(account_id: int, token = Depends(verification_admin_token)):
-    account = await frieze_account(account_id)
-    return account
-
+@admin_router.get("/get_not_activate_admins")
+async def get_not_activate_admins(token = Depends(verification_admin_token)):
+    admins = await get_not_activate_admins_crud()
+    return admins
 
 @admin_router.put("/activate_admin")
 async def activate_admin(admin_id: int, token = Depends(verification_admin_token)):
@@ -86,11 +85,6 @@ async def activate_admin(admin_id: int, token = Depends(verification_admin_token
 async def reject_admin(admin_id: int, token = Depends(verification_admin_token)):
     await reject_admin_crud(admin_id)
     return {"ok": True}
-
-@admin_router.get("/get_not_activate_admins")
-async def get_not_activate_admins(token = Depends(verification_admin_token)):
-    admins = await get_not_activate_admins_crud()
-    return admins
 
 @admin_router.get("/get_clients")
 async def admin_get_clients(first_name: str | None = None,
@@ -112,3 +106,13 @@ async def admin_get_clients(first_name: str | None = None,
 async def admin_get_accounts(client_id: int, token = Depends(verification_admin_token)):
     accounts = await get_accounts(int(client_id))
     return accounts
+
+@admin_router.put("/frieze_account")
+async def admin_frieze_account(account_id: int, token = Depends(verification_admin_token)):
+    account = await frieze_account(account_id)
+    return account
+
+@admin_router.put("/unfreeze_account")
+async def admin_frieze_account(account_id: int, token = Depends(verification_admin_token)):
+    account = await unfreeze_account(account_id)
+    return account

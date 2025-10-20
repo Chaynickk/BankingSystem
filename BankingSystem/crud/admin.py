@@ -122,7 +122,7 @@ async def get_admin_by_id(admin_id):
 async def frieze_account(account_id):
     async with get_session() as session:
         try:
-            account = session.execute(select (Account).where(Account.account_id == account_id))
+            account = await session.execute(select(Account).where(Account.account_id == account_id))
             account = account.scalar_one_or_none()
 
             if account is None:
@@ -130,6 +130,11 @@ async def frieze_account(account_id):
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="Account is not found"
                 )
+
+            account.is_frozen = True
+
+            await session.commit()
+
             return account
         except HTTPException as e:
             await session.rollback()
@@ -139,6 +144,31 @@ async def frieze_account(account_id):
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+async def unfreeze_account(account_id):
+    async with get_session() as session:
+        try:
+            account = await session.execute(select(Account).where(Account.account_id == account_id))
+            account = account.scalar_one_or_none()
+            if account is None:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Account is not found"
+                )
+
+            account.is_frozen = False
+
+            await session.commit()
+
+        except HTTPException as e:
+            await session.rollback()
+            raise e
+        except Exception:
+            await session.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
 
 async def get_not_activate_admins_crud():
     async with get_session() as session:

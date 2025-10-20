@@ -6,7 +6,8 @@ from software.functions.accaunts import add_account, del_account, transaction
 from software.functions.enter import login, registration
 
 
-def login_frame(window: tk.Tk, old_frame=None):
+
+def login_frame(window: tk.Tk, old_frame=None, is_client=True):
     if old_frame is not None:
         old_frame.destroy()
 
@@ -42,11 +43,25 @@ def login_frame(window: tk.Tk, old_frame=None):
     login_button.grid(column=7, row=16, sticky=tk.NSEW)
 
     registration_button = ttk.Button(root, text="Зарегестрироватся",
-                                     command=lambda: registrations_frame(window, root),
+                                     command=lambda: registrations_frame(window, root, is_client),
                                      style="Reg.TButton")
     registration_button.grid(column=0, row=0, sticky=tk.NSEW)
 
-def registrations_frame(window: tk.Tk, old_frame=None):
+    if is_client:
+        admin_button = ttk.Button(root,
+                                  text="Войти как админ",
+                                  command=lambda: login_frame(window=window, old_frame=root, is_client=False),
+                                  style="Login.TButton")
+        admin_button.grid(column=0, row=19, sticky=tk.NSEW)
+    else:
+        client_button = ttk.Button(root,
+                                  text="Войти как клиент",
+                                  command=lambda: login_frame(window=window, old_frame=root, is_client=True),
+                                  style="Login.TButton")
+        client_button.grid(column=0, row=19, sticky=tk.NSEW)
+
+
+def registrations_frame(window: tk.Tk, old_frame=None, is_client=True):
     if old_frame is not None:
         old_frame.destroy()
 
@@ -57,41 +72,38 @@ def registrations_frame(window: tk.Tk, old_frame=None):
 
     first_name_entry = ttk.Entry(root, font=("Arial", 23))
     first_name_entry.grid(column=4, row=10, sticky=tk.NSEW, columnspan=7)
-
     first_name_label = ttk.Label(root, text="Имя", font=("Arial", 23))
     first_name_label.grid(column=3, row=10)
 
     last_name_entry = ttk.Entry(root, font=("Arial", 23))
     last_name_entry.grid(column=4, row=15, sticky=tk.NSEW, columnspan=7)
-
     last_name_label = ttk.Label(root, text="Фамилия", font=("Arial", 23))
     last_name_label.grid(column=3, row=15)
 
     patronymic_entry = ttk.Entry(root, font=("Arial", 23))
     patronymic_entry.grid(column=4, row=20, sticky=tk.NSEW, columnspan=7)
-
     patronymic_label = ttk.Label(root, text="Отчество", justify=tk.CENTER, font=("Arial", 23))
     patronymic_label.grid(column=3, row=20)
 
+    password_entry = ttk.Entry(root, font=("Arial", 23))
+    password_entry.grid(column=4, row=30, sticky=tk.NSEW, columnspan=7)
+    password_label = ttk.Label(root, text="Пароль", font=("Arial", 23))
+    password_label.grid(column=3, row=30)
+
     email_entry = ttk.Entry(root, font=("Arial", 23))
     email_entry.grid(column=4, row=25, sticky=tk.NSEW, columnspan=7)
-
     email_label = ttk.Label(root, text="Email", font=("Arial", 23))
     email_label.grid(column=3, row=25)
 
-    phone_number_entry = ttk.Entry(root, font=("Arial", 23))
-    phone_number_entry.grid(column=4, row=30, sticky=tk.NSEW, columnspan=7)
 
-    phone_number_label = ttk.Label(root, text="Телефон", font=("Arial", 23))
-    phone_number_label.grid(column=3, row=30)
+    if is_client:
+        phone_number_entry = ttk.Entry(root, font=("Arial", 23))
+        phone_number_entry.grid(column=4, row=35, sticky=tk.NSEW, columnspan=7)
+        phone_number_label = ttk.Label(root, text="Телефон", font=("Arial", 23))
+        phone_number_label.grid(column=3, row=35)
 
-    password_entry = ttk.Entry(root, font=("Arial", 23))
-    password_entry.grid(column=4, row=35, sticky=tk.NSEW, columnspan=7)
 
-    password_label = ttk.Label(root, text="Пароль", font=("Arial", 23))
-    password_label.grid(column=3, row=35)
-
-    login_button = ttk.Button(root, text="Войти", command=lambda: login_frame(window, root), style="Login.TButton")
+    login_button = ttk.Button(root, text="Войти", command=lambda: login_frame(window, root, is_client), style="Login.TButton")
     login_button.grid(column=0, row=0, sticky=tk.NSEW, rowspan=6, columnspan=2)
 
     error_label = ttk.Label(root, text="", foreground="red", font=("Arial", 20))
@@ -109,6 +121,19 @@ def registrations_frame(window: tk.Tk, old_frame=None):
                                                            label=error_label,
                                                            func=lambda: client_frame(window, root)))
     registration_button.grid(column=7, row=80, sticky=tk.NSEW, rowspan=6)
+
+    if is_client:
+        admin_button = ttk.Button(root,
+                                  text="Зарегистрироваться\nкак админ",
+                                  command=lambda: registrations_frame(window=window, old_frame=root, is_client=False),
+                                  style="Reg.TButton")
+        admin_button.grid(column=0, row=96, rowspan=4, sticky=tk.NSEW)
+    else:
+        client_button = ttk.Button(root,
+                                  text="Зарегистрироваться\nкак клиент",
+                                  command=lambda: registrations_frame(window=window, old_frame=root, is_client=True),
+                                  style="Reg.TButton")
+        client_button.grid(column=0, row=96, rowspan=4, sticky=tk.NSEW)
 
 def client_frame(window: tk.Tk, old_frame=None):
     if old_frame is not None:

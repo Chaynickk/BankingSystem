@@ -9,7 +9,7 @@ login_button_style = ttk.Style()
 login_button_style.configure("Login.TButton", font=("Arial", 18))
 
 registration_button_style = ttk.Style()
-registration_button_style.configure("Reg.TButton", font=("Arial", 14))
+registration_button_style.configure("Reg.TButton", font=("Arial", 14), justify=tk.CENTER)
 
 create_button_style = ttk.Style()
 create_button_style.configure("CreateAccount.TButton", font=("Arial", 20))
