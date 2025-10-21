@@ -60,7 +60,6 @@ def login_frame(window: tk.Tk, old_frame=None, is_client=True):
                                   style="Login.TButton")
         client_button.grid(column=0, row=19, sticky=tk.NSEW)
 
-
 def registrations_frame(window: tk.Tk, old_frame=None, is_client=True):
     if old_frame is not None:
         old_frame.destroy()
@@ -134,6 +133,35 @@ def registrations_frame(window: tk.Tk, old_frame=None, is_client=True):
                                   command=lambda: registrations_frame(window=window, old_frame=root, is_client=True),
                                   style="Reg.TButton")
         client_button.grid(column=0, row=96, rowspan=4, sticky=tk.NSEW)
+
+def admin_frame_found_users(window: tk.Tk, old_frame=None):
+    if old_frame is not None:
+        old_frame.destroy()
+
+    root = ttk.Frame(window)
+    root.pack(expand=True, fill=tk.BOTH)
+    root.columnconfigure(index=0, weight=1)
+    root.columnconfigure(index=1, weight=5)
+
+    root.rowconfigure(index=0, weight=1)
+
+    menu_frame = tk.Frame(root, bg="gray")
+    menu_frame.grid(column=0, row=0, rowspan=1, sticky=tk.NSEW)
+
+    menu_frame.rowconfigure(index=0, weight=1)
+    menu_frame.rowconfigure(index=1, weight=1)
+    menu_frame.rowconfigure(index=2, weight=10)
+    menu_frame.rowconfigure(index=3, weight=1)
+
+    find_client_button = ttk.Button(menu_frame,text="Найти клиента")
+    find_client_button.grid(column=0, row=0, sticky=tk.NSEW)
+    find_admin_button = ttk.Button(menu_frame, text="Найти клиента")
+    find_admin_button.grid(column=0, row=1, sticky=tk.NSEW)
+    exit_button = ttk.Button(menu_frame, text="Выйти")
+    exit_button.grid(column=0, row=3, sticky=tk.NSEW)
+
+    find_frame = tk.Frame(root)
+    find_frame.grid(column=1, row=0, rowspan=1, sticky=tk.NSEW)
 
 def client_frame(window: tk.Tk, old_frame=None):
     if old_frame is not None:

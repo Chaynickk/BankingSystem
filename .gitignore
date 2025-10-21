@@ -21,3 +21,4 @@ BankingSystem/.env
 /BankingSystem/software/api_requests/__pycache__
 /BankingSystem/__pycache__
 /GuessWordTg
+/BankingSystem/.venv312

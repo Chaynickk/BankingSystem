@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
-from software.functions.frames import login_frame, client_frame, frame_account, are_you_sure_frame
+from software.functions.frames import login_frame, client_frame, frame_account, are_you_sure_frame, \
+    admin_frame_found_users
 
 root = tk.Tk()
 root.geometry("1500x900")
@@ -32,7 +33,7 @@ transaction_button_style.configure("Transaction.TButton", font=("Arial", 20))
 choice_button_style = ttk.Style()
 choice_button_style.configure("Choice.TButton", font=("Arial", 20))
 
-login_frame(root)
-
+#login_frame(root)
+admin_frame_found_users(root)
 
 root.mainloop()
