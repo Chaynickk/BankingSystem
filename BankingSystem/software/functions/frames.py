@@ -2,9 +2,11 @@ import tkinter as tk
 from tkinter import ttk
 
 from software.api_requests.accouts import request_get_accounts
+from software.api_requests.admin import request_get_admins, request_reject_admin, request_activate_admin, \
+    request_find_clients
 from software.functions.accaunts import add_account, del_account, transaction
-from software.functions.enter import login, registration
-
+from software.functions.admin import find_clients, activate_admin, reject_admin
+from software.functions.enter import login, registration, login_admin
 
 
 def login_frame(window: tk.Tk, old_frame=None, is_client=True):
@@ -32,15 +34,24 @@ def login_frame(window: tk.Tk, old_frame=None, is_client=True):
     error_label = ttk.Label(root, text="", foreground="red", font=("Arial", 20))
     error_label.grid(column=5, row=12, columnspan=5)
 
-
-    login_button = ttk.Button(root,
-                              text="Войти",
-                              command=lambda: login(email=email_entry.get(),
-                                                    password=password_entry.get(),
-                                                    label=error_label,
-                                                    func=lambda: client_frame(window, root)),
-                              style="Login.TButton")
-    login_button.grid(column=7, row=16, sticky=tk.NSEW)
+    if is_client:
+        login_button = ttk.Button(root,
+                                  text="Войти",
+                                  command=lambda: login(email=email_entry.get(),
+                                                        password=password_entry.get(),
+                                                        label=error_label,
+                                                        func=lambda: client_frame(window, root)),
+                                  style="Login.TButton")
+        login_button.grid(column=7, row=16, sticky=tk.NSEW)
+    else:
+        login_button = ttk.Button(root,
+                                  text="Войти",
+                                  command=lambda: login_admin(email=email_entry.get(),
+                                                        password=password_entry.get(),
+                                                        label=error_label,
+                                                        func=lambda: admin_frame_found_users(window, root)),
+                                  style="Login.TButton")
+        login_button.grid(column=7, row=16, sticky=tk.NSEW)
 
     registration_button = ttk.Button(root, text="Зарегестрироватся",
                                      command=lambda: registrations_frame(window, root, is_client),
@@ -66,6 +77,7 @@ def registrations_frame(window: tk.Tk, old_frame=None, is_client=True):
 
     root = ttk.Frame(window)
     root.pack(expand=True, fill=tk.BOTH)
+
     for c in range(15): root.columnconfigure(index=c, weight=1)
     for r in range(100): root.rowconfigure(index=r, weight=1)
 
@@ -100,7 +112,6 @@ def registrations_frame(window: tk.Tk, old_frame=None, is_client=True):
         phone_number_entry.grid(column=4, row=35, sticky=tk.NSEW, columnspan=7)
         phone_number_label = ttk.Label(root, text="Телефон", font=("Arial", 23))
         phone_number_label.grid(column=3, row=35)
-
 
     login_button = ttk.Button(root, text="Войти", command=lambda: login_frame(window, root, is_client), style="Login.TButton")
     login_button.grid(column=0, row=0, sticky=tk.NSEW, rowspan=6, columnspan=2)
@@ -149,19 +160,335 @@ def admin_frame_found_users(window: tk.Tk, old_frame=None):
     menu_frame.grid(column=0, row=0, rowspan=1, sticky=tk.NSEW)
 
     menu_frame.rowconfigure(index=0, weight=1)
-    menu_frame.rowconfigure(index=1, weight=1)
-    menu_frame.rowconfigure(index=2, weight=10)
-    menu_frame.rowconfigure(index=3, weight=1)
+    menu_frame.rowconfigure(index=1, weight=4)
+    menu_frame.rowconfigure(index=2, weight=1)
+    menu_frame.rowconfigure(index=3, weight=4)
+    menu_frame.rowconfigure(index=4, weight=20)
+    menu_frame.rowconfigure(index=5, weight=4)
+    menu_frame.rowconfigure(index=6, weight=1)
 
-    find_client_button = ttk.Button(menu_frame,text="Найти клиента")
-    find_client_button.grid(column=0, row=0, sticky=tk.NSEW)
-    find_admin_button = ttk.Button(menu_frame, text="Найти клиента")
-    find_admin_button.grid(column=0, row=1, sticky=tk.NSEW)
-    exit_button = ttk.Button(menu_frame, text="Выйти")
-    exit_button.grid(column=0, row=3, sticky=tk.NSEW)
+    menu_frame.columnconfigure(index=0, weight=1)
+    menu_frame.columnconfigure(index=1, weight=8)
+    menu_frame.columnconfigure(index=2, weight=1)
+
+    find_client_button = ttk.Button(menu_frame,text="Найти клиента", style="Choice.TButton", command=lambda: admin_frame_found_users(window, root))
+    find_client_button.grid(column=1, row=1, sticky=tk.NSEW)
+    find_admin_button = ttk.Button(menu_frame, text="Заявки на админа", style="Choice.TButton", command=lambda: admin_frame_requests(window, root))
+    find_admin_button.grid(column=1, row=3, sticky=tk.NSEW)
+    exit_button = ttk.Button(menu_frame, text="Выйти", style="Exit.TButton", command=lambda: login_frame(window, root, False))
+    exit_button.grid(column=1, row=5, sticky=tk.NSEW)
 
     find_frame = tk.Frame(root)
     find_frame.grid(column=1, row=0, rowspan=1, sticky=tk.NSEW)
+    for c in range(15): find_frame.columnconfigure(index=c, weight=1)
+    for r in range(100): find_frame.rowconfigure(index=r, weight=1)
+
+    first_name_entry = ttk.Entry(find_frame, font=("Arial", 23))
+    first_name_entry.grid(column=4, row=10, sticky=tk.NSEW, columnspan=7)
+    first_name_label = ttk.Label(find_frame, text="Имя", font=("Arial", 23))
+    first_name_label.grid(column=3, row=10)
+
+    last_name_entry = ttk.Entry(find_frame, font=("Arial", 23))
+    last_name_entry.grid(column=4, row=15, sticky=tk.NSEW, columnspan=7)
+    last_name_label = ttk.Label(find_frame, text="Фамилия", font=("Arial", 23))
+    last_name_label.grid(column=3, row=15)
+
+    patronymic_entry = ttk.Entry(find_frame, font=("Arial", 23))
+    patronymic_entry.grid(column=4, row=20, sticky=tk.NSEW, columnspan=7)
+    patronymic_label = ttk.Label(find_frame, text="Отчество", justify=tk.CENTER, font=("Arial", 23))
+    patronymic_label.grid(column=3, row=20)
+
+    email_entry = ttk.Entry(find_frame, font=("Arial", 23))
+    email_entry.grid(column=4, row=25, sticky=tk.NSEW, columnspan=7)
+    email_label = ttk.Label(find_frame, text="Email", font=("Arial", 23))
+    email_label.grid(column=3, row=25)
+
+    phone_number_entry = ttk.Entry(find_frame, font=("Arial", 23))
+    phone_number_entry.grid(column=4, row=30, sticky=tk.NSEW, columnspan=7)
+    phone_number_label = ttk.Label(find_frame, text="Телефон", font=("Arial", 23))
+    phone_number_label.grid(column=3, row=30)
+
+    id_client_entry = ttk.Entry(find_frame, font=("Arial", 23))
+    id_client_entry.grid(column=4, row=35, sticky=tk.NSEW, columnspan=7)
+    id_client_label = ttk.Label(find_frame, text="ID", font=("Arial", 23))
+    id_client_label.grid(column=3, row=35)
+
+    error_label = ttk.Label(find_frame, text="", foreground="red", font=("Arial", 20))
+    error_label.grid(column=5, row=60, columnspan=5)
+
+    registration_button = ttk.Button(find_frame,
+                                     text="Найти",
+                                     style="Reg.TButton",
+                                     command=lambda: find_clients(func=lambda:
+                                     admin_frame_clients(window=window,
+                                                         old_frame=root,
+                                                         clients=request_find_clients(email=email_entry.get(),
+                                                                  id_client=id_client_entry.get(),
+                                                                  first_name=first_name_entry.get(),
+                                                                  last_name=last_name_entry.get(),
+                                                                  patronymic=patronymic_entry.get(),
+                                                                  phone_number=phone_number_entry.get(),
+                                                                  ))))
+    registration_button.grid(column=7, row=80, sticky=tk.NSEW, rowspan=6)
+
+def admin_frame_requests(window: tk.Tk, old_frame=None):
+    if old_frame is not None:
+        old_frame.destroy()
+
+    root = ttk.Frame(window)
+    root.pack(expand=True, fill=tk.BOTH)
+    root.columnconfigure(index=0, weight=1)
+    root.columnconfigure(index=1, weight=5)
+
+    root.rowconfigure(index=0, weight=1)
+
+    menu_frame = tk.Frame(root, bg="gray")
+    menu_frame.grid(column=0, row=0, rowspan=1, sticky=tk.NSEW)
+
+    menu_frame.rowconfigure(index=0, weight=1)
+    menu_frame.rowconfigure(index=1, weight=4)
+    menu_frame.rowconfigure(index=2, weight=1)
+    menu_frame.rowconfigure(index=3, weight=4)
+    menu_frame.rowconfigure(index=4, weight=20)
+    menu_frame.rowconfigure(index=5, weight=4)
+    menu_frame.rowconfigure(index=6, weight=1)
+
+    menu_frame.columnconfigure(index=0, weight=1)
+    menu_frame.columnconfigure(index=1, weight=8)
+    menu_frame.columnconfigure(index=2, weight=1)
+
+    find_client_button = ttk.Button(menu_frame,text="Найти клиента", style="Choice.TButton", command=lambda: admin_frame_found_users(window, root))
+    find_client_button.grid(column=1, row=1, sticky=tk.NSEW)
+    find_admin_button = ttk.Button(menu_frame, text="Заявки на админа", style="Choice.TButton", command=lambda: admin_frame_requests(window, root))
+    find_admin_button.grid(column=1, row=3, sticky=tk.NSEW)
+    exit_button = ttk.Button(menu_frame, text="Выйти", style="Exit.TButton", command=lambda: login_frame(window, root, False))
+    exit_button.grid(column=1, row=5, sticky=tk.NSEW)
+
+    requests_canvas = tk.Canvas(root, highlightthickness=0)
+    requests_canvas.grid(column=1, row=0, columnspan=10, rowspan=10, sticky=tk.NSEW)
+
+    scrollbar = ttk.Scrollbar(root, orient="vertical", command=requests_canvas.yview)
+    scrollbar.grid(column=12, row=0, rowspan=10, sticky=tk.NS)
+
+    requests_canvas.configure(yscrollcommand=scrollbar.set)
+
+    requests_canvas.columnconfigure(index=0, weight=20)
+    requests_canvas.columnconfigure(index=1, weight=1)
+    requests_canvas.rowconfigure(index=0, weight=1)
+    requests_canvas.rowconfigure(index=1, weight=1)
+
+    requests_frame = tk.Frame(requests_canvas)
+    win_id = requests_canvas.create_window((0, 0), window=requests_frame, anchor="nw")
+
+    requests_frame.bind("<Configure>", lambda e: requests_canvas.configure(scrollregion=requests_canvas.bbox("all")))
+    requests_canvas.bind("<Configure>", lambda e: requests_canvas.itemconfigure(win_id, width=e.width))
+
+
+    requests_frame.columnconfigure(index=0, weight=1, minsize=4)
+    requests_frame.columnconfigure(index=1, weight=6)
+    requests_frame.columnconfigure(index=2, weight=1, minsize=4)
+    requests_frame.columnconfigure(index=3, weight=6)
+    requests_frame.columnconfigure(index=4, weight=1, minsize=4)
+
+    error_label = ttk.Label(requests_frame, text="", foreground="red", font=("Arial", 20))
+    error_label.grid(column=0, row=0, columnspan=2)
+
+    try:
+        admins = request_get_admins().json()
+    except KeyError:
+        error_label.config(text="Произошла ошибка, попробуйте перезати")
+        admins = []
+
+    len_admins = len(admins)
+
+    for r in range(len_admins*2 + 1):
+        if r == 0:
+            requests_frame.rowconfigure(index=r, weight=2)
+        elif r % 2 == 0:
+            requests_frame.rowconfigure(index=r, weight=1, minsize=4)
+        else:
+            requests_frame.rowconfigure(index=r, weight=4)
+
+    r = 1
+    c = 1
+    i = -1
+    list_frame = []
+    while len_admins > 0:
+
+
+        admin_frame = tk.Frame(requests_frame, bg="#d5d5d5")
+        admin_frame.grid(row=r, column=c, sticky=tk.NSEW)
+
+        list_frame.append(admin_frame)
+
+        admin_frame.columnconfigure(index=0, weight=1)
+        admin_frame.columnconfigure(index=1, weight=2)
+        admin_frame.columnconfigure(index=2, weight=5)
+        admin_frame.columnconfigure(index=3, weight=4)
+        admin_frame.columnconfigure(index=4, weight=2)
+
+        admin_frame.rowconfigure(index=0, weight=5)
+        admin_frame.rowconfigure(index=1, weight=5)
+        admin_frame.rowconfigure(index=2, weight=10)
+
+        admin_frame.columnconfigure(index=5, weight=1)
+        admin_frame.rowconfigure(index=3, weight=2)
+
+        admin_name_label = tk.Label(admin_frame, text=f"ФИО: {admins[i]["first_name"]} {admins[i]["last_name"]} {admins[i]["patronymic"] or ''}", bg="#d5d5d5", font=("Arial", 18), justify=tk.CENTER)
+        admin_name_label.grid(column=0, row=0, columnspan=4, sticky=tk.EW)
+
+        admin_email_label = tk.Label(admin_frame, text=f"Email: {admins[i]["email"]}", bg="#d5d5d5", font=("Arial", 18), width=350, wraplength=500, justify="left")
+        admin_email_label.grid(column=0, columnspan=4, row=1, sticky=tk.W)
+
+        button_reject = ttk.Button(admin_frame,
+                                  text="Отклонить",
+                                  style="Enter.TButton",
+                                  command=lambda admin_id=admins[i]["admin_id"]:
+                                  reject_admin(admin_id,
+                                               lambda: admin_frame_requests(window,root)))
+        button_reject.grid(column=2, columnspan=2, row=2, sticky=tk.E)
+
+        button_activate = ttk.Button(admin_frame,
+                                  text="Принять",
+                                  style="Enter.TButton",
+                                  command=lambda admin_id=admins[i]["admin_id"]:
+                                  activate_admin(admin_id,
+                                               lambda: admin_frame_requests(window,root)))
+        button_activate.grid(column=0, columnspan=2, row=2, sticky=tk.EW)
+
+
+        len_admins -= 1
+        i-=1
+
+        if c + 2 >= 4:
+            c = 1
+            r+=2
+        else:
+            c+=2
+
+def admin_frame_clients(window: tk.Tk, clients, old_frame=None):
+    if old_frame is not None:
+        old_frame.destroy()
+
+    root = ttk.Frame(window)
+    root.pack(expand=True, fill=tk.BOTH)
+    root.columnconfigure(index=0, weight=1)
+    root.columnconfigure(index=1, weight=5)
+
+    root.rowconfigure(index=0, weight=1)
+
+    menu_frame = tk.Frame(root, bg="gray")
+    menu_frame.grid(column=0, row=0, rowspan=1, sticky=tk.NSEW)
+
+    menu_frame.rowconfigure(index=0, weight=1)
+    menu_frame.rowconfigure(index=1, weight=4)
+    menu_frame.rowconfigure(index=2, weight=1)
+    menu_frame.rowconfigure(index=3, weight=4)
+    menu_frame.rowconfigure(index=4, weight=20)
+    menu_frame.rowconfigure(index=5, weight=4)
+    menu_frame.rowconfigure(index=6, weight=1)
+
+    menu_frame.columnconfigure(index=0, weight=1)
+    menu_frame.columnconfigure(index=1, weight=8)
+    menu_frame.columnconfigure(index=2, weight=1)
+
+    find_client_button = ttk.Button(menu_frame,text="Найти клиента", style="Choice.TButton", command=lambda: admin_frame_found_users(window, root))
+    find_client_button.grid(column=1, row=1, sticky=tk.NSEW)
+    find_admin_button = ttk.Button(menu_frame, text="Заявки на админа", style="Choice.TButton", command=lambda: admin_frame_requests(window, root))
+    find_admin_button.grid(column=1, row=3, sticky=tk.NSEW)
+    exit_button = ttk.Button(menu_frame, text="Выйти", style="Exit.TButton", command=lambda: login_frame(window, root, False))
+    exit_button.grid(column=1, row=5, sticky=tk.NSEW)
+
+    requests_canvas = tk.Canvas(root, highlightthickness=0)
+    requests_canvas.grid(column=1, row=0, columnspan=10, rowspan=10, sticky=tk.NSEW)
+
+    scrollbar = ttk.Scrollbar(root, orient="vertical", command=requests_canvas.yview)
+    scrollbar.grid(column=12, row=0, rowspan=10, sticky=tk.NS)
+
+    requests_canvas.configure(yscrollcommand=scrollbar.set)
+
+    requests_canvas.columnconfigure(index=0, weight=20)
+    requests_canvas.columnconfigure(index=1, weight=1)
+    requests_canvas.rowconfigure(index=0, weight=1)
+    requests_canvas.rowconfigure(index=1, weight=1)
+
+    requests_frame = tk.Frame(requests_canvas)
+    win_id = requests_canvas.create_window((0, 0), window=requests_frame, anchor="nw")
+
+    requests_frame.bind("<Configure>", lambda e: requests_canvas.configure(scrollregion=requests_canvas.bbox("all")))
+    requests_canvas.bind("<Configure>", lambda e: requests_canvas.itemconfigure(win_id, width=e.width))
+
+
+    requests_frame.columnconfigure(index=0, weight=1, minsize=4)
+    requests_frame.columnconfigure(index=1, weight=6)
+    requests_frame.columnconfigure(index=2, weight=1, minsize=4)
+    requests_frame.columnconfigure(index=3, weight=6)
+    requests_frame.columnconfigure(index=4, weight=1, minsize=4)
+
+    error_label = ttk.Label(requests_frame, text="", foreground="red", font=("Arial", 20))
+    error_label.grid(column=0, row=0, columnspan=2)
+
+    len_clients = len(clients)
+
+    for r in range(len_clients*2 + 1):
+        if r == 0:
+            requests_frame.rowconfigure(index=r, weight=2)
+        elif r % 2 == 0:
+            requests_frame.rowconfigure(index=r, weight=1, minsize=4)
+        else:
+            requests_frame.rowconfigure(index=r, weight=4)
+
+    r = 1
+    c = 1
+    i = -1
+    list_frame = []
+    while len_clients > 0:
+
+
+        admin_frame = tk.Frame(requests_frame, bg="#d5d5d5")
+        admin_frame.grid(row=r, column=c, sticky=tk.NSEW)
+
+        list_frame.append(admin_frame)
+
+        admin_frame.columnconfigure(index=0, weight=1)
+        admin_frame.columnconfigure(index=1, weight=2)
+        admin_frame.columnconfigure(index=2, weight=5)
+        admin_frame.columnconfigure(index=3, weight=4)
+        admin_frame.columnconfigure(index=4, weight=2)
+
+        admin_frame.rowconfigure(index=0, weight=5)
+        admin_frame.rowconfigure(index=1, weight=5)
+        admin_frame.rowconfigure(index=2, weight=5)
+        admin_frame.rowconfigure(index=3, weight=10)
+
+        admin_frame.columnconfigure(index=5, weight=1)
+        admin_frame.rowconfigure(index=3, weight=2)
+
+        admin_name_label = tk.Label(admin_frame, text=f"ФИО: {clients[i]["first_name"]} {clients[i]["last_name"]} {clients[i]["patronymic"] or ''}", bg="#d5d5d5", font=("Arial", 18), justify=tk.CENTER)
+        admin_name_label.grid(column=0, row=0, columnspan=4, sticky=tk.EW)
+
+        admin_email_label = tk.Label(admin_frame, text=f"Email: {clients[i]["email"]}", bg="#d5d5d5", font=("Arial", 18), width=350, wraplength=500, justify="left")
+        admin_email_label.grid(column=0, columnspan=4, row=2, sticky=tk.W)
+
+        admin_phone_label = tk.Label(admin_frame, text=f"Телефон: {clients[i]["phone_number"]}", bg="#d5d5d5",
+                                     font=("Arial", 18), width=350, wraplength=500, justify="left")
+        admin_phone_label.grid(column=0, columnspan=4, row=2, sticky=tk.W)
+
+        button_activate = ttk.Button(admin_frame,
+                                  text="Счета",
+                                  style="Enter.TButton"
+                                  )
+        button_activate.grid(column=0, columnspan=2, row=2, sticky=tk.EW)
+
+
+        len_clients -= 1
+        i-=1
+
+        if c + 2 >= 4:
+            c = 1
+            r+=2
+        else:
+            c+=2
 
 def client_frame(window: tk.Tk, old_frame=None):
     if old_frame is not None:

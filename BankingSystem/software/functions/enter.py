@@ -68,11 +68,10 @@ def login_admin(email, password, label, func):
     if response.status_code == 200:
         config.set_token(response.json()["access_token"])
         config.set_user_data({
-          "first_name": response.json()["client"]["first_name"],
-          "last_name": response.json()["client"]["last_name"],
-          "patronymic": response.json()["client"]["patronymic"],
-          "email": response.json()["client"]["email"],
-          "phone_number": response.json()["client"]["phone_number"]
+          "first_name": response.json()["admin"]["first_name"],
+          "last_name": response.json()["admin"]["last_name"],
+          "patronymic": response.json()["admin"]["patronymic"],
+          "email": response.json()["admin"]["email"]
         })
         func()
     elif response.status_code == 401:
@@ -105,11 +104,10 @@ def registration_admin(first_name, last_name, email, password, label, func, patr
     if response.status_code == 200:
         config.set_token(response.json()["access_token"])
         config.set_user_data({
-            "first_name": response.json()["client"]["first_name"],
-            "last_name": response.json()["client"]["last_name"],
-            "patronymic": response.json()["client"]["patronymic"],
-            "email": response.json()["client"]["email"],
-            "phone_number": response.json()["client"]["phone_number"]
+            "first_name": response.json()["admin"]["first_name"],
+            "last_name": response.json()["admin"]["last_name"],
+            "patronymic": response.json()["admin"]["patronymic"],
+            "email": response.json()["admin"]["email"]
         })
         func()
     elif response.status_code == 409:

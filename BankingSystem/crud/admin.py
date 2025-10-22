@@ -219,7 +219,8 @@ async def select_clients(client_id: int = None,
 
             result = await session.scalars(query)
             return result.all()
-
+        except HTTPException as e:
+            raise e
         except Exception:
             await session.rollback()
             raise HTTPException(
