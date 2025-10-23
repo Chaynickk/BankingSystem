@@ -3,9 +3,9 @@ from tkinter import ttk
 
 from software.api_requests.accouts import request_get_accounts
 from software.api_requests.admin import request_get_admins, request_reject_admin, request_activate_admin, \
-    request_find_clients
+    request_find_clients, request_get_accounts_admin
 from software.functions.accaunts import add_account, del_account, transaction
-from software.functions.admin import find_clients, activate_admin, reject_admin
+from software.functions.admin import find_clients, activate_admin, reject_admin, frieze_account, unfreeze_account
 from software.functions.enter import login, registration, login_admin
 
 
@@ -443,7 +443,7 @@ def admin_frame_clients(window: tk.Tk, clients, old_frame=None):
     i = -1
     list_frame = []
     while len_clients > 0:
-
+        print(len_clients)
 
         admin_frame = tk.Frame(requests_frame, bg="#d5d5d5")
         admin_frame.grid(row=r, column=c, sticky=tk.NSEW)
@@ -459,6 +459,7 @@ def admin_frame_clients(window: tk.Tk, clients, old_frame=None):
         admin_frame.rowconfigure(index=0, weight=5)
         admin_frame.rowconfigure(index=1, weight=5)
         admin_frame.rowconfigure(index=2, weight=5)
+        admin_frame.rowconfigure(index=2, weight=5)
         admin_frame.rowconfigure(index=3, weight=10)
 
         admin_frame.columnconfigure(index=5, weight=1)
@@ -470,18 +471,166 @@ def admin_frame_clients(window: tk.Tk, clients, old_frame=None):
         admin_email_label = tk.Label(admin_frame, text=f"Email: {clients[i]["email"]}", bg="#d5d5d5", font=("Arial", 18), width=350, wraplength=500, justify="left")
         admin_email_label.grid(column=0, columnspan=4, row=2, sticky=tk.W)
 
-        admin_phone_label = tk.Label(admin_frame, text=f"Телефон: {clients[i]["phone_number"]}", bg="#d5d5d5",
+        admin_phone_label = tk.Label(admin_frame, text=f"Телефон: {clients[i]["phone_number"][4:]}", bg="#d5d5d5",
                                      font=("Arial", 18), width=350, wraplength=500, justify="left")
-        admin_phone_label.grid(column=0, columnspan=4, row=2, sticky=tk.W)
+        admin_phone_label.grid(column=0, columnspan=4, row=3, sticky=tk.W)
 
-        button_activate = ttk.Button(admin_frame,
-                                  text="Счета",
-                                  style="Enter.TButton"
-                                  )
-        button_activate.grid(column=0, columnspan=2, row=2, sticky=tk.EW)
+        button_open_accounts = ttk.Button(admin_frame,
+                                          text="Счета",
+                                          style="Enter.TButton",
+                                          command=lambda client_id=clients[i]["client_id"]: admin_frame_accounts(window=window,
+                                                                               old_frame=root,
+                                                                               client_id=client_id))
+        button_open_accounts.grid(column=0, columnspan=2, row=4, sticky=tk.EW)
 
 
         len_clients -= 1
+        i-=1
+
+        if c + 2 >= 4:
+            c = 1
+            r+=2
+        else:
+            c+=2
+
+def admin_frame_accounts(window: tk.Tk, client_id, old_frame=None):
+    if old_frame is not None:
+        old_frame.destroy()
+
+    root = ttk.Frame(window)
+    root.pack(expand=True, fill=tk.BOTH)
+    root.columnconfigure(index=0, weight=1)
+    root.columnconfigure(index=1, weight=5)
+
+    root.rowconfigure(index=0, weight=1)
+
+    menu_frame = tk.Frame(root, bg="gray")
+    menu_frame.grid(column=0, row=0, rowspan=1, sticky=tk.NSEW)
+
+    menu_frame.rowconfigure(index=0, weight=1)
+    menu_frame.rowconfigure(index=1, weight=4)
+    menu_frame.rowconfigure(index=2, weight=1)
+    menu_frame.rowconfigure(index=3, weight=4)
+    menu_frame.rowconfigure(index=4, weight=20)
+    menu_frame.rowconfigure(index=5, weight=4)
+    menu_frame.rowconfigure(index=6, weight=1)
+
+    menu_frame.columnconfigure(index=0, weight=1)
+    menu_frame.columnconfigure(index=1, weight=8)
+    menu_frame.columnconfigure(index=2, weight=1)
+
+    find_client_button = ttk.Button(menu_frame,text="Найти клиента", style="Choice.TButton", command=lambda: admin_frame_found_users(window, root))
+    find_client_button.grid(column=1, row=1, sticky=tk.NSEW)
+    find_admin_button = ttk.Button(menu_frame, text="Заявки на админа", style="Choice.TButton", command=lambda: admin_frame_requests(window, root))
+    find_admin_button.grid(column=1, row=3, sticky=tk.NSEW)
+    exit_button = ttk.Button(menu_frame, text="Выйти", style="Exit.TButton", command=lambda: login_frame(window, root, False))
+    exit_button.grid(column=1, row=5, sticky=tk.NSEW)
+
+    requests_canvas = tk.Canvas(root, highlightthickness=0)
+    requests_canvas.grid(column=1, row=0, columnspan=10, rowspan=10, sticky=tk.NSEW)
+
+    scrollbar = ttk.Scrollbar(root, orient="vertical", command=requests_canvas.yview)
+    scrollbar.grid(column=12, row=0, rowspan=10, sticky=tk.NS)
+
+    requests_canvas.configure(yscrollcommand=scrollbar.set)
+
+    requests_canvas.columnconfigure(index=0, weight=20)
+    requests_canvas.columnconfigure(index=1, weight=1)
+    requests_canvas.rowconfigure(index=0, weight=1)
+    requests_canvas.rowconfigure(index=1, weight=1)
+
+    requests_frame = tk.Frame(requests_canvas)
+    win_id = requests_canvas.create_window((0, 0), window=requests_frame, anchor="nw")
+
+    requests_frame.bind("<Configure>", lambda e: requests_canvas.configure(scrollregion=requests_canvas.bbox("all")))
+    requests_canvas.bind("<Configure>", lambda e: requests_canvas.itemconfigure(win_id, width=e.width))
+
+
+    requests_frame.columnconfigure(index=0, weight=1, minsize=4)
+    requests_frame.columnconfigure(index=1, weight=6)
+    requests_frame.columnconfigure(index=2, weight=1, minsize=4)
+    requests_frame.columnconfigure(index=3, weight=6)
+    requests_frame.columnconfigure(index=4, weight=1, minsize=4)
+
+    error_label = ttk.Label(requests_frame, text="", foreground="red", font=("Arial", 20))
+    error_label.grid(column=0, row=0, columnspan=2)
+
+    try:
+        accounts=request_get_accounts_admin(int(client_id))
+    except:
+        accounts=[]
+
+    len_accounts = len(accounts)
+
+    for r in range(len_accounts*2 + 1):
+        if r == 0:
+            requests_frame.rowconfigure(index=r, weight=2)
+        elif r % 2 == 0:
+            requests_frame.rowconfigure(index=r, weight=1, minsize=4)
+        else:
+            requests_frame.rowconfigure(index=r, weight=4)
+
+    r = 1
+    c = 1
+    i = -1
+    list_frame = []
+    while len_accounts > 0:
+        print(len_accounts)
+
+        admin_frame = tk.Frame(requests_frame, bg="#d5d5d5")
+        admin_frame.grid(row=r, column=c, sticky=tk.NSEW)
+
+        list_frame.append(admin_frame)
+
+        admin_frame.columnconfigure(index=0, weight=1)
+        admin_frame.columnconfigure(index=1, weight=2)
+        admin_frame.columnconfigure(index=2, weight=5)
+        admin_frame.columnconfigure(index=3, weight=4)
+        admin_frame.columnconfigure(index=4, weight=2)
+
+        admin_frame.rowconfigure(index=0, weight=5)
+        admin_frame.rowconfigure(index=1, weight=5)
+        admin_frame.rowconfigure(index=2, weight=5)
+        admin_frame.rowconfigure(index=3, weight=5)
+        admin_frame.rowconfigure(index=4, weight=10)
+
+        admin_frame.columnconfigure(index=5, weight=1)
+        admin_frame.rowconfigure(index=3, weight=2)
+
+        label_account = tk.Label(admin_frame, text=f"№ {accounts[i]["account_id"]}", bg="#d5d5d5", font=("Arial", 23),
+                                 justify=tk.CENTER)
+        label_account.grid(column=0, row=0, columnspan=4)
+
+        label_balance = tk.Label(admin_frame,
+                                 text=f"Баланс:\n{int(accounts[i]["amount_decimal"]) / 100:,.2f}".replace(",", " "),
+                                 bg="#d5d5d5", font=("Arial", 18), justify=tk.LEFT)
+        label_balance.grid(column=0, row=1, sticky=tk.EW)
+
+        label_status = tk.Label(admin_frame,
+                                 text=f"Состояние:\n{"Заморожен" if accounts[i]["is_frozen"] else "Активен"}",
+                                 bg="#d5d5d5", font=("Arial", 18), justify="right")
+        label_status.grid(column=4, row=1, sticky=tk.EW)
+
+        button_activate = ttk.Button(admin_frame,
+                                     text="Заморозить",
+                                     style="Enter.TButton",
+                                     command=lambda account_id=accounts[i]["account_id"]:
+                                     frieze_account(account_id=account_id,
+                                                    func=lambda:admin_frame_accounts(window=window, client_id=client_id, old_frame=root))
+                                  )
+        button_activate.grid(column=0, columnspan=2, row=4, sticky=tk.EW)
+
+        button_activate = ttk.Button(admin_frame,
+                                     text="Разморозить",
+                                     style="Enter.TButton",
+                                     command=lambda account_id=accounts[i]["account_id"]:
+                                     unfreeze_account(account_id=account_id,
+                                                    func=lambda:admin_frame_accounts(window=window, client_id=client_id, old_frame=root))
+                                  )
+        button_activate.grid(column=4, columnspan=2, row=4, sticky=tk.EW)
+
+
+        len_accounts -= 1
         i-=1
 
         if c + 2 >= 4:

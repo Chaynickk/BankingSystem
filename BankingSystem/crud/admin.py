@@ -124,7 +124,6 @@ async def frieze_account(account_id):
         try:
             account = await session.execute(select(Account).where(Account.account_id == account_id))
             account = account.scalar_one_or_none()
-
             if account is None:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -134,6 +133,7 @@ async def frieze_account(account_id):
             account.is_frozen = True
 
             await session.commit()
+            await session.refresh(account)
 
             return account
         except HTTPException as e:
@@ -159,7 +159,9 @@ async def unfreeze_account(account_id):
             account.is_frozen = False
 
             await session.commit()
+            await session.refresh(account)
 
+            return account
         except HTTPException as e:
             await session.rollback()
             raise e

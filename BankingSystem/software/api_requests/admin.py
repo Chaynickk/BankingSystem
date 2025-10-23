@@ -34,10 +34,13 @@ def request_find_clients(first_name=None, last_name=None, email=None, id_client=
     response = requests.get(API_URL + f"admin/get_clients", params=params, headers=headers)
     return response.json()
 
-def request_get_accounts(client_id):
+def request_get_accounts_admin(client_id):
     headers = {"Authorization": f"Bearer {config.token}"}
     response = requests.get(API_URL + f"admin/get_accounts?client_id={client_id}", headers=headers)
-    return response
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return []
 
 def request_get_admins():
     headers = {"Authorization": f"Bearer {config.token}"}
@@ -53,4 +56,14 @@ def request_activate_admin(admin_id):
 def request_reject_admin(admin_id):
     headers = {"Authorization": f"Bearer {config.token}"}
     response = requests.delete(API_URL + f"admin/reject_admin?admin_id={admin_id}", headers=headers)
+    return response
+
+def request_frieze_account(account_id):
+    headers = {"Authorization": f"Bearer {config.token}"}
+    response = requests.put(API_URL + f"admin/frieze_account?account_id={account_id}", headers=headers)
+    return response
+
+def request_unfreeze_account(account_id):
+    headers = {"Authorization": f"Bearer {config.token}"}
+    response = requests.put(API_URL + f"admin/unfreeze_account?account_id={account_id}", headers=headers)
     return response
