@@ -33,7 +33,6 @@ transaction_button_style.configure("Transaction.TButton", font=("Arial", 20))
 choice_button_style = ttk.Style()
 choice_button_style.configure("Choice.TButton", font=("Arial", 20))
 
-#login_frame(root)
-admin_frame_found_users(root)
+login_frame(root)
 
 root.mainloop()

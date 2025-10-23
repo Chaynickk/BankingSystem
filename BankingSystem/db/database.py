@@ -6,7 +6,6 @@ from config import DATABASE_URL
 
 class Base(DeclarativeBase): pass
 
-
 async_engine = create_async_engine(DATABASE_URL, echo=True )
 
 AsyncSessionLocal = async_sessionmaker(async_engine, expire_on_commit=False)
