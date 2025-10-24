@@ -14,7 +14,6 @@ async def account_registration(token=Depends(verification_client_token)):
 
 @account_router.get("/get")
 async def accounts_get(token=Depends(verification_client_token)):
-    print("ROUTER")
     accounts = await select_account(int(token["sub"]))
     return {"Accounts": accounts}
 
